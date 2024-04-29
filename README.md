@@ -1,0 +1,1 @@
+Client-Server app for monitoring CO2 in living room
