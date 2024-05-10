@@ -1,11 +1,13 @@
 #ifndef DATA_HPP
 #define DATA_HPP
 
-struct Data
-{
-    //some data from application
+#include <functional>
+#include <string>
+
+struct Data {
+  // some data from application
 };
 
-using Callback = std::function<void(std::string, Data)>;
+using ProcessDataCallback = std::function<void(std::string, Data)>;
 
 #endif
