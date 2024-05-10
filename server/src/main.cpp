@@ -1,28 +1,29 @@
-#include <iostream>
-#include "CO2Sensor/CO2Sensor.hpp"
 #include "Application/Application.hpp"
+#include "CO2Sensor/CO2Sensor.hpp"
 #include "Database/SQLiteDatabase.hpp"
 #include "Server.hpp"
+#include <iostream>
 
 using namespace boost::asio;
 
-int main(){
+int main() {
 
-    io_context ioContext;
-    ip::tcp::endpoint endpoint(ip::tcp::v4(), 12345);
-    
-    Server server(ioContext, endpoint, [](std::string message, Data responseData) {
-        std::cout << "Received data from Application\n"; 
-    });
+  io_context ioContext;
+  ip::tcp::endpoint endpoint(ip::tcp::v4(), 12345);
 
-    SQLiteDatabase db(nullptr);
-    CO2Sensor sensor("/dev/ttyS0");
-    
-    Application app(sensor, db);
+  Server server(ioContext, endpoint,
+                [](std::string message, Data responseData) {
+                  std::cout << "Received data from Application\n";
+                });
 
-    server.startAccept();
+  SQLiteDatabase db(nullptr);
+  CO2Sensor sensor("/dev/ttyS0");
 
-    ioContext.run();
+  Application app(sensor, db);
 
-    return 0;
+  server.startAccept();
+
+  ioContext.run();
+
+  return 0;
 }
