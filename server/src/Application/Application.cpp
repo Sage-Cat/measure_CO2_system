@@ -1,15 +1,17 @@
 #include "Application.hpp"
 
 Application::Application(CO2Sensor &co2Sensor, SQLiteDatabase &sqliteDatabase)
-    : sensor(co2Sensor), database(sqliteDatabase) {}
+    : sensor(co2Sensor), database(sqliteDatabase)
+{
+}
 
 Application::~Application() {}
 
-void Application::doTask(Callback callback) {
+void Application::doTask(Callback callback)
+{
+    Data resData;
 
-  Data resData;
+    // some work with data
 
-  // some work with data
-
-  callback(resData);
+    callback(resData);
 }
