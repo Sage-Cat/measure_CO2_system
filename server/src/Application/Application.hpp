@@ -9,18 +9,17 @@ class CO2Sensor;
 class SQLiteDatabase;
 
 class Application {
-
 public:
-  using Callback = std::function<void(Data)>;
+    using Callback = std::function<void(Data)>;
 
-  Application(CO2Sensor &co2Sensor, SQLiteDatabase &sqliteDatabase);
-  ~Application();
+    Application(CO2Sensor &co2Sensor, SQLiteDatabase &sqliteDatabase);
+    ~Application();
 
-  void doTask(Callback callback);
+    void doTask(Callback callback);
 
 private:
-  CO2Sensor &sensor;
-  SQLiteDatabase &database;
+    CO2Sensor &sensor;
+    SQLiteDatabase &database;
 };
 
 #endif

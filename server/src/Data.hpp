@@ -5,7 +5,7 @@
 #include <string>
 
 struct Data {
-  // some data from application
+    // some data from application
 };
 
 using ProcessDataCallback = std::function<void(std::string, Data)>;
