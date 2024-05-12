@@ -1,25 +1,26 @@
 @startuml
 
-package "Client" {
+package "Kotlin Client" {
     [Ui] as Ui
-    [HttpClient] as HttpClient
+    [Client] as Client
 
-    HttpClient -[hidden]- Ui
+    Client -[hidden]- Ui
 }
 
-package "Server" {
-    [HttpServer] as HttpServer
-    [HttpSession] as HttpSession
+package "RPI Server" {
+    [Server] as Server
+    [Session] as Session
     [Application] as Application
     [CO2Sensor] as CO2Sensor
     [SQLiteDatabase] as SQLiteDatabase
 
-    HttpServer --> HttpSession : creates sessions
-    HttpSession -> Application : callback
+    Server --> Session : creates sessions
+    Session -> Application : DoTaskCallback
+    Session <- Application : SendResponseCallback
     Application ..> CO2Sensor : uses
     Application ..> SQLiteDatabase : uses 
 }
 
-HttpClient -> HttpServer : http://localhost:8001
+Client -> Server : http://localhost:8001
 
 @enduml
