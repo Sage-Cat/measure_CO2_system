@@ -6,14 +6,14 @@
 #include <memory>
 #include <vector>
 
+#include "Data.hpp"
+
 using namespace boost::asio;
 using namespace boost::asio::ip;
 
 class Session : public std::enable_shared_from_this<Session> {
 public:
-    using ProcessDataCallback = std::function<void(std::shared_ptr<Session>, std::vector<char>)>;
-
-    Session(io_context &io_context, tcp::socket &&socket, ProcessDataCallback processDataCallback,
+    Session(io_context &io_context, tcp::socket &&socket, DoTaskCallback doTaskCallback,
             unsigned int sessionId);
 
     void start();
@@ -21,11 +21,11 @@ public:
 
 private:
     void doRead();
-    void doWrite(std::size_t length);
+    void doWrite(const std::string &response);
 
     tcp::socket socket_;
     std::vector<char> data_;
-    ProcessDataCallback processDataCallback_;
+    DoTaskCallback doTaskCallback_;
     unsigned int sessionId_;
 };
 

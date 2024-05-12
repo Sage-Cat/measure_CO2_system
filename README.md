@@ -3,7 +3,7 @@ Client-Server app for monitoring CO2 in living room
 ## Dependencies
 
 ```
-sudo apt install libspdlog-dev libboost-system-dev libboost-filesystem-dev libsqlite3-dev
+sudo apt install nlohmann-json3-dev libspdlog-dev libboost-system-dev libboost-filesystem-dev libsqlite3-dev
 ```
 
 ## Build steps
@@ -19,3 +19,7 @@ cmake --build .
 ```
 find . -type f \( -name '*.cpp' -or -name '*.hpp' \) -exec clang-format -i {} +
 ```
+
+## General architecture
+
+[general_arch](docs/general_arch.png)

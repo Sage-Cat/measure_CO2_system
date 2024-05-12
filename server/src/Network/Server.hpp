@@ -2,7 +2,7 @@
 #define SERVER_HPP
 
 #include <memory>
-#include <vector>
+#include <unordered_map>
 
 #include <boost/asio.hpp>
 
@@ -13,20 +13,19 @@ using namespace boost::asio::ip;
 
 class Server {
 public:
-    Server(io_context &io_context, const tcp::endpoint &endpoint,
-           Session::ProcessDataCallback procDataCallback);
+    Server(io_context &io_context, const tcp::endpoint &endpoint, DoTaskCallback doTaskCallback);
 
     void startAccept();
 
 private:
-    void handleAccept(const boost::system::error_code &error, std::shared_ptr<Session> session);
+    void handleAccept(const boost::system::error_code &error, std::shared_ptr<tcp::socket> socket);
 
 private:
     io_context &ioContext_;
     tcp::acceptor acceptor_;
-    std::vector<std::shared_ptr<Session>> sessions;
+    std::unordered_map<unsigned int, std::shared_ptr<Session>> sessions;
 
-    Session::ProcessDataCallback procDataCallback_;
+    DoTaskCallback doTaskCallback_;
 };
 
-#endif
+#endif // SERVER_HPP

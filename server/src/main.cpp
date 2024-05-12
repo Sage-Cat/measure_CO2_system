@@ -16,18 +16,17 @@ int main()
 {
     SpdlogConfig::init<SpdlogConfig::LogLevel::Trace>();
 
-    io_context ioContext;
-    ip::tcp::endpoint endpoint(ip::tcp::v4(), 12345);
-
-    Server server(
-        ioContext, endpoint, [](std::shared_ptr<Session> session, std::vector<char> responseData) {
-            SPDLOG_INFO("Received data: {}", std::string(responseData.begin(), responseData.end()));
-        });
-
     SQLiteDatabase db(DATABASE_FILE_PATH); // create/open db near exe file
 
-    // CO2Sensor sensor("/dev/ttyS0");
-    // Application app(sensor, db);
+    CO2Sensor sensor("/dev/pts/2");
+    Application app(sensor, db);
+
+    io_context ioContext;
+    ip::tcp::endpoint endpoint(ip::tcp::v4(), 12345);
+    Server server(ioContext, endpoint, [&app](RequestData data, SendResponseCallback callback) {
+        SPDLOG_TRACE("DoTaskCallback");
+        app.doTask(data, callback);
+    });
 
     server.startAccept();
 

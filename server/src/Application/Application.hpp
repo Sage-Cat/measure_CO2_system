@@ -10,12 +10,10 @@ class SQLiteDatabase;
 
 class Application {
 public:
-    using HandleDataCallback = std::function<void(Data)>;
-
     Application(CO2Sensor &co2Sensor, SQLiteDatabase &sqliteDatabase);
-    ~Application();
+    ~Application() = default;
 
-    void doTask(HandleDataCallback handleDataCallback);
+    void doTask(RequestData data, SendResponseCallback callback);
 
 private:
     CO2Sensor &sensor;
