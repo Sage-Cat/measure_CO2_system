@@ -6,14 +6,23 @@
 #include <vector>
 
 struct CO2Sample {
-    std::string datetime; // sqlite datetime format - 'YYYY-MM-DD hh:mm:ss'
-    std::string CO2Level;
+    std::string datetime{}; // sqlite datetime format - 'YYYY-MM-DD hh:mm:ss'
+    std::string CO2Level{};
 };
 
-struct Data {
-    std::vector<CO2Sample> measurements;
+struct RequestData {
+    std::string cmd{};
+    std::string param1{};
 };
 
-using ProcessDataCallback = std::function<void(std::string, Data)>;
+struct ResponseData {
+    std::vector<CO2Sample> measurements{};
+};
+
+// callback for Application layer to send data back to client
+using SendResponseCallback = std::function<void(ResponseData)>;
+
+// callback for Network layer to process data from client
+using DoTaskCallback = std::function<void(RequestData, SendResponseCallback)>;
 
 #endif

@@ -5,13 +5,9 @@ Application::Application(CO2Sensor &co2Sensor, SQLiteDatabase &sqliteDatabase)
 {
 }
 
-Application::~Application() {}
-
-void Application::doTask(HandleDataCallback handleDataCallback)
+void Application::doTask(RequestData data, SendResponseCallback callback)
 {
-    Data resData;
+    ResponseData resData{};
 
-    // TODO: Perform data analysis using machine learning algorithms
-
-    handleDataCallback(resData);
+    callback(resData);
 }
