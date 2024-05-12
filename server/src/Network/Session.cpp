@@ -25,6 +25,7 @@ void Session::doRead()
         if (!ec) {
             try {
                 auto json = nlohmann::json::parse(std::string(data_.data(), length));
+                SPDLOG_TRACE("Session::doRead | Got data from client: {}", json.dump());
                 RequestData requestData{.cmd    = json.at("cmd").get<std::string>(),
                                         .param1 = json.at("param1").get<std::string>()};
                 doTaskCallback_(requestData, [this](ResponseData data) {
@@ -61,7 +62,7 @@ void Session::doRead()
 
 void Session::doWrite(const std::string &response)
 {
-    SPDLOG_TRACE("Session::doWrite");
+    SPDLOG_TRACE("Session::doWrite | Sending to client: {}", response);
     auto self(shared_from_this());
     std::copy(response.begin(), response.end(), data_.begin());
     async_write(socket_, buffer(data_, response.size()),

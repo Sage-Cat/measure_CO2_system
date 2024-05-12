@@ -22,4 +22,4 @@ find . -type f \( -name '*.cpp' -or -name '*.hpp' \) -exec clang-format -i {} +
 
 ## General architecture
 
-[general_arch](docs/general_arch.png)
+![general_arch](docs/general_arch.png)
