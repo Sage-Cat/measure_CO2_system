@@ -6,35 +6,35 @@
 
 class CO2Sensor {
 public:
-    // Constructor
     CO2Sensor(const std::string &port);
 
-    // Destructor
     ~CO2Sensor();
 
-    // Read CO2 concentration
+    // Read CO2 concentration in parts per million (PPM) using UART interface.
+    // Returning value is integer
     int readCO2();
 
-    // ZERO POINT CALIBRATION
-    // NOTE：ZERO POINT is 400PPM,
-    // PLS MAKE SURE THE SENSOR HAD BEEN WORKED
-    // UNDER 400PPM FOR OVER 20MINUTES
+    // Perform zero point calibration.
+    // Ensure the sensor has been exposed to an environment
+    // with a CO2 concentration of 400PPM for over 20 minutes.
     void calibrateZero();
 
-    // SPAN is 2000ppm，HIGH = 2000 / 256；LOW = 2000 % 256
-    // Pls do ZERO calibration before span calibration
-    // Suggest using 2000ppm as span, at least 1000ppm
+    // Perform span calibration.
+    // Perform zero point calibration before span calibration.
+    // It's recommended to use a span of 2000PPM, but at least 1000PPM.
     void calibrateSpan();
 
-    // All Winsen sensor with ABC logic on before delivery.
-    void onAutoCalibration();
+    // Enable automatic calibration logic (ABC) provided by the sensor.
+    // ABC logic is typically enabled by default.
+    void enableAutoCalibration();
 
-    void offAutoCalibration();
+    // Disable automatic calibration logic (ABC) provided by the sensor.
+    void disableAutoCalibration();
 
-    // Detection range is 2000 or 5000ppm
+    // Set the detection range of the sensor to either 2000 or 5000 PPM.
     void setDetectionRange();
 
-    // Checksum to verify data receipt
+    // Calculate checksum to verify data integrity.
     char getCheckSum();
 
 private:
