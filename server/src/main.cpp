@@ -24,9 +24,9 @@ int main()
             SPDLOG_INFO("Received data: {}", std::string(responseData.begin(), responseData.end()));
         });
 
-    // SQLiteDatabase db(nullptr);
-    // CO2Sensor sensor("/dev/ttyS0");
+    SQLiteDatabase db(DATABASE_FILE_PATH); // create/open db near exe file
 
+    // CO2Sensor sensor("/dev/ttyS0");
     // Application app(sensor, db);
 
     server.startAccept();
