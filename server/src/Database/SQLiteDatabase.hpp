@@ -1,15 +1,30 @@
-#ifndef SQLITE_HPP
-#define SQLITE_HPP
+#ifndef SQLITE_DATABASE_HPP
+#define SQLITE_DATABASE_HPP
 
+#include <memory>
+
+#include <boost/noncopyable.hpp>
 #include <sqlite3.h>
 
-class SQLiteDatabase {
+#include "Data.hpp"
+
+class SQLiteDatabase : private boost::noncopyable {
 public:
-    SQLiteDatabase(const char *dbPath);
-    ~SQLiteDatabase();
+    explicit SQLiteDatabase(const std::string &dbPath);
+    ~SQLiteDatabase() = default;
+
+    bool initDatabaseSchema();
+    bool addMeasurement(const CO2Sample &sample);
+    std::vector<CO2Sample> getMeasurementsAfterDate(const std::string &dateAfter);
 
 private:
-    sqlite3 *db;
+    struct StatementDeleter {
+        void operator()(sqlite3_stmt *stmt) const { sqlite3_finalize(stmt); }
+    };
+
+private:
+    std::unique_ptr<sqlite3, decltype(&sqlite3_close)> db;
+    std::string dbPath;
 };
 
-#endif
+#endif // SQLITE_DATABASE_HPP
