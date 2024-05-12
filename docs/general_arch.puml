@@ -1,0 +1,25 @@
+@startuml
+
+package "Client" {
+    [Ui] as Ui
+    [HttpClient] as HttpClient
+
+    HttpClient -[hidden]- Ui
+}
+
+package "Server" {
+    [HttpServer] as HttpServer
+    [HttpSession] as HttpSession
+    [Application] as Application
+    [CO2Sensor] as CO2Sensor
+    [SQLiteDatabase] as SQLiteDatabase
+
+    HttpServer --> HttpSession : creates sessions
+    HttpSession -> Application : callback
+    Application ..> CO2Sensor : uses
+    Application ..> SQLiteDatabase : uses 
+}
+
+HttpClient -> HttpServer : http://localhost:8001
+
+@enduml
