@@ -25,9 +25,9 @@ void CO2Sensor::calibrateZero() {}
 
 void CO2Sensor::calibrateSpan() {}
 
-void CO2Sensor::onAutoCalibration() {}
+void CO2Sensor::enableAutoCalibration() {}
 
-void CO2Sensor::offAutoCalibration() {}
+void CO2Sensor::disableAutoCalibration() {}
 
 void CO2Sensor::setDetectionRange() {}
 

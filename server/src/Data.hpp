@@ -5,7 +5,7 @@
 #include <string>
 
 struct Data {
-    // some data from application
+    std::string currentCO2Level;
 };
 
 using ProcessDataCallback = std::function<void(std::string, Data)>;

@@ -11,7 +11,7 @@ void Application::doTask(Callback callback)
 {
     Data resData;
 
-    // some work with data
+    // TODO: Perform data analysis using machine learning algorithms
 
     callback(resData);
 }
