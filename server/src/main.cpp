@@ -17,8 +17,8 @@ int main()
     SpdlogConfig::init<SpdlogConfig::LogLevel::Trace>();
 
     SQLiteDatabase db(DATABASE_FILE_PATH); // create/open db near exe file
-
-    CO2Sensor sensor("/dev/ttyAMA0");
+    
+    CO2Sensor sensor("/dev/pts2"); // use /dev/ttyAMA0 on RPI4B
 
     Application app(sensor, db);
 
