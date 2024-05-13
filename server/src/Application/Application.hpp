@@ -1,37 +1,39 @@
 #ifndef APPLICATION_HPP
 #define APPLICATION_HPP
 
+#include <atomic>
+#include <chrono>
 #include <functional>
-#include <thread>
 #include <iomanip>
 #include <sstream>
-#include <chrono>
+#include <thread>
 
 #include "Data.hpp"
-
-#define TIME_BETWEEN_MEASURING 120
 
 class CO2Sensor;
 class SQLiteDatabase;
 
 class Application {
 public:
-    Application(CO2Sensor &co2Sensor, SQLiteDatabase &db);
-    ~Application() = default;
+    static constexpr std::chrono::seconds DEFAULT_MEASURING_INTERVAL{120};
+
+    Application(CO2Sensor &co2Sensor, SQLiteDatabase &db,
+                std::chrono::seconds measuring_interval = DEFAULT_MEASURING_INTERVAL);
+    ~Application();
 
     void doTask(RequestData data, SendResponseCallback callback);
 
 private:
+    void sensorTask();
+    std::string getCurrentDateTime();
 
-    
+private:
     CO2Sensor &sensor_;
     SQLiteDatabase &db_;
 
-    std::jthread sensorThread;
-
-    void sensorTask();
-
-    std::string getCurrentDateTime();
+    std::thread sensorThread_;
+    std::atomic<bool> stopThread_;
+    std::chrono::seconds measuringInterval_;
 };
 
 #endif

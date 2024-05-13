@@ -1,50 +1,43 @@
 #ifndef CO2SENSOR_HPP
 #define CO2SENSOR_HPP
 
+#include <array>
 #include <boost/asio.hpp>
 #include <string>
 
 class CO2Sensor {
 public:
-    CO2Sensor(const std::string &port);
+    enum class Calibration : int { Span2000 = 2000, Span5000 = 5000 };
+    static constexpr int DEFAULT_CO2 = 400;
+    static constexpr int MIN_SPAN_PPM = 1000;
 
+public:
+    explicit CO2Sensor(const std::string &port);
     ~CO2Sensor();
 
-    // Read CO2 concentration in parts per million (PPM) using UART interface.
-    // Returning value is integer
+    // Reads CO2 concentration in PPM using UART interface.
     int readCO2();
 
-    // Perform zero point calibration.
-    // Ensure the sensor has been exposed to an environment
-    // with a CO2 concentration of 400PPM for over 20 minutes.
+    // Calibrates the zero point assuming the sensor is in a 400PPM CO2 environment.
     void calibrateZero();
 
-    // Perform span calibration.
-    // Perform zero point calibration before span calibration.
-    // It's recommended to use a span of 2000PPM, but at least 1000PPM.
+    // Calibrates the span. Precondition: perform zero point calibration first.
     void calibrateSpan(int span);
 
-    // Enable automatic calibration logic (ABC) provided by the sensor.
-    // ABC logic is typically enabled by default.
-    void enableAutoCalibration();
+    // Toggles the automatic calibration logic (ABC) provided by the sensor.
+    void enableAutoCalibration(bool enable);
 
-    // Disable automatic calibration logic (ABC) provided by the sensor.
-    void disableAutoCalibration();
-
-    // Set the detection range of the sensor to either 2000 or 5000 PPM.
-    void setDetectionRange(int range);
-
-    // Calculate checksum to verify data integrity.
-    char getCheckSum();
+    // Sets the detection range for the sensor to predefined spans.
+    void setDetectionRange(Calibration range);
 
 private:
-    boost::asio::io_service io;
-
-    boost::asio::serial_port UARTPort;
-
-    unsigned char command[9];
-
     void sendCommand();
+    char calculateChecksum() const;
+
+private:
+    boost::asio::io_service io_;
+    boost::asio::serial_port uart_port_;
+    std::array<unsigned char, 9> command_;
 };
 
-#endif
+#endif // CO2SENSOR_HPP
