@@ -22,7 +22,7 @@ public:
     // Perform span calibration.
     // Perform zero point calibration before span calibration.
     // It's recommended to use a span of 2000PPM, but at least 1000PPM.
-    void calibrateSpan();
+    void calibrateSpan(int span);
 
     // Enable automatic calibration logic (ABC) provided by the sensor.
     // ABC logic is typically enabled by default.
@@ -32,7 +32,7 @@ public:
     void disableAutoCalibration();
 
     // Set the detection range of the sensor to either 2000 or 5000 PPM.
-    void setDetectionRange();
+    void setDetectionRange(int range);
 
     // Calculate checksum to verify data integrity.
     char getCheckSum();
@@ -41,6 +41,10 @@ private:
     boost::asio::io_service io;
 
     boost::asio::serial_port UARTPort;
+
+    unsigned char command[9];
+
+    void sendCommand();
 };
 
 #endif
