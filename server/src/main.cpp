@@ -18,7 +18,8 @@ int main()
 
     SQLiteDatabase db(DATABASE_FILE_PATH); // create/open db near exe file
 
-    CO2Sensor sensor("/dev/pts/2");
+    CO2Sensor sensor("/dev/ttyAMA0");
+
     Application app(sensor, db);
 
     io_context ioContext;
