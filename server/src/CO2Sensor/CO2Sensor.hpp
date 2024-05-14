@@ -8,7 +8,7 @@
 class CO2Sensor {
 public:
     enum class Calibration : int { Span2000 = 2000, Span5000 = 5000 };
-    static constexpr int DEFAULT_CO2 = 400;
+    static constexpr int DEFAULT_CO2  = 400;
     static constexpr int MIN_SPAN_PPM = 1000;
 
 public:
@@ -33,6 +33,7 @@ public:
 private:
     void sendCommand();
     char calculateChecksum() const;
+    void configurePort();
 
 private:
     boost::asio::io_service io_;

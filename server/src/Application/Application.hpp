@@ -15,10 +15,8 @@ class SQLiteDatabase;
 
 class Application {
 public:
-    static constexpr std::chrono::seconds DEFAULT_MEASURING_INTERVAL{120};
-
     Application(CO2Sensor &co2Sensor, SQLiteDatabase &db,
-                std::chrono::seconds measuring_interval = DEFAULT_MEASURING_INTERVAL);
+                std::chrono::seconds measuring_interval);
     ~Application();
 
     void doTask(RequestData data, SendResponseCallback callback);
@@ -36,4 +34,4 @@ private:
     std::chrono::seconds measuringInterval_;
 };
 
-#endif
+#endif // APPLICATION_HPP
