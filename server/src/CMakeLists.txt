@@ -26,6 +26,7 @@ target_link_libraries(MeasuringServer
     ${SQLite3_LIBRARIES} 
     spdlog::spdlog 
     nlohmann_json::nlohmann_json
+    pthread
 )
 
 # Set the output directory for the executable
