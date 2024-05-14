@@ -10,16 +10,30 @@ CO2Sensor::CO2Sensor(const std::string &port)
     : uart_port_(io_, port), command_({0xFF, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00})
 {
     SPDLOG_TRACE("CO2Sensor::CO2Sensor");
-    // Set baud rate to 9600
-    uart_port_.set_option(boost::asio::serial_port_base::baud_rate(9600));
+    configurePort();
+    SPDLOG_INFO("Configured serial_port {} successfully", port);
 }
 
 CO2Sensor::~CO2Sensor()
 {
     SPDLOG_TRACE("CO2Sensor::~CO2Sensor");
-    // Close the serial port if it is open
     if (uart_port_.is_open()) {
         uart_port_.close();
+    }
+}
+
+void CO2Sensor::configurePort()
+{
+    try {
+        uart_port_.set_option(boost::asio::serial_port_base::baud_rate(9600));
+        uart_port_.set_option(boost::asio::serial_port_base::character_size(8));
+        uart_port_.set_option(
+            boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none));
+        uart_port_.set_option(boost::asio::serial_port_base::stop_bits(
+            boost::asio::serial_port_base::stop_bits::one));
+    } catch (const std::exception &e) {
+        SPDLOG_ERROR("Error configuring serial port: {}", e.what());
+        throw;
     }
 }
 
@@ -28,7 +42,6 @@ int CO2Sensor::readCO2()
     SPDLOG_TRACE("CO2Sensor::readCO2");
     // Command to read CO2 (mh-Z19B command).
     command_[2] = 0x86;
-
     sendCommand();
 
     std::array<unsigned char, 9> response{};
@@ -63,22 +76,22 @@ void CO2Sensor::calibrateSpan(int span)
     command_[2] = 0x88;
     command_[3] = static_cast<unsigned char>(span >> 8);
     command_[4] = static_cast<unsigned char>(span & 0xFF);
-
     sendCommand();
 }
 
 void CO2Sensor::enableAutoCalibration(bool enable)
 {
     SPDLOG_TRACE("CO2Sensor::enableAutoCalibration - {}", enable);
-    command_[2] = 0x79;                 // Command to toggle auto-calibration (mh-Z19B ABC command).
-    command_[3] = enable ? 0xA0 : 0x00; // Enable or disable auto-calibration.
-
+    // Command to toggle auto-calibration (mh-Z19B ABC command).
+    command_[2] = 0x79;
+    command_[3] = enable ? 0xA0 : 0x00;
     sendCommand();
 }
 
 void CO2Sensor::setDetectionRange(Calibration range)
 {
-    SPDLOG_TRACE("CO2Sensor::setDetectionRange - {}", range == Calibration::Span2000 ? "2000" : "5000");
+    SPDLOG_TRACE("CO2Sensor::setDetectionRange - {}",
+                 range == Calibration::Span2000 ? "2000" : "5000");
     constexpr std::array<std::pair<unsigned char, unsigned char>, 2> ranges = {{
         {0x07, 0xD0}, // Settings for 2000 ppm range.
         {0x13, 0x88}  // Settings for 5000 ppm range.
