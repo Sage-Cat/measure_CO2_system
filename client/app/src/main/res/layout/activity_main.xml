@@ -9,23 +9,87 @@
     android:textAlignment="center"
     tools:context=".MainActivity">
 
-    <FrameLayout
-        android:id="@+id/frameLayout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-    </FrameLayout>
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigationView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="261dp"
+        android:layout_height="47dp"
+        android:fontFamily="@font/montserrat_light"
+        android:text="MEASURING LIST"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:menu="@menu/bottom_nav_menu"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.085" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recView"
+        android:layout_width="373dp"
+        android:layout_height="238dp"
+        android:background="@drawable/rectangle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.233" />
+
+    <TextView
+        android:id="@+id/tvSelectedDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Date"
+        android:textColor="#FFFFFF"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnSelectDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat_light"
+        android:text="Choose date"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.593" />
+
+    <Button
+        android:id="@+id/btnMeasureFromDate"
+        android:layout_width="165dp"
+        android:layout_height="64dp"
+        android:fontFamily="@font/montserrat_light"
+        android:text="Get measuring from date"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.894"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.745"
+        app:rippleColor="#76319F" />
+
+    <Button
+        android:id="@+id/btnAllMeasure"
+        android:layout_width="165dp"
+        android:layout_height="64dp"
+        android:fontFamily="@font/montserrat_light"
+        android:text="Get all measuring"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/btnMeasureFromDate"
+        app:layout_constraintHorizontal_bias="0.559"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.745"
+        app:rippleColor="#76319F" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
