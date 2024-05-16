@@ -29,6 +29,8 @@ int main(int argc, char **argv)
     // Default values
     std::string sensorPath = "/dev/ttyAMA0";
     int measuringInterval  = 10;
+    boost::asio::ip::address ip_address = boost::asio::ip::address::from_string("10.10.10.112");
+    unsigned short port                 = 12345;
 
     // Argument parsing using getopt
     int opt;
@@ -59,7 +61,7 @@ int main(int argc, char **argv)
     Application application(sensor, db, std::chrono::seconds(measuringInterval));
 
     io_context ioContext;
-    ip::tcp::endpoint endpoint(ip::tcp::v4(), 12345);
+    ip::tcp::endpoint endpoint(ip_address, port);
     Server server(ioContext, endpoint,
                   [&application](RequestData data, SendResponseCallback callback) {
                       SPDLOG_TRACE("DoTaskCallback");
