@@ -57,19 +57,20 @@ class MainFragment : Fragment() {
         }
 
         view.findViewById<Button>(R.id.btnAllMeasure).setOnClickListener {
-            getSensorData("get_all", "")
+            getSensorData("get_indoor", "")
         }
 
         view.findViewById<Button>(R.id.btnMeasureFromDate).setOnClickListener {
-            getSensorData("get_after", selectedDate)
+            getSensorData("get_indoor_after", selectedDate)
         }
 
-        val retrofit = Retrofit.Builder().baseUrl("http://10.10.10.112:12345/")
+
+        val retrofit = Retrofit.Builder().baseUrl("http://192.168.31.142:12345/")
             .addConverterFactory(GsonConverterFactory.create())
             .client(OkHttpClient.Builder().build()).build()
 
         apiService = retrofit.create(ApiService::class.java)
-        getSensorData("get_all", "")
+        getSensorData("get_indoor", "")
 
         return view
     }
