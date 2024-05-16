@@ -16,10 +16,13 @@ using namespace boost::asio;
 
 void printUsage(const char *progName)
 {
-    std::cout << "Usage: " << progName << " [-s sensorPath] [-i measuringInterval]\n"
+    std::cout << "Usage: " << progName
+              << " [-s sensorPath] [-i measuringInterval] [-a ipAddress] [-p port]\n"
               << "Options:\n"
               << "  -s, --sensor       Sensor path (default: /dev/ttyAMA0)\n"
-              << "  -i, --interval     Measuring interval in seconds (default: 10)\n";
+              << "  -i, --interval     Measuring interval in seconds (default: 10)\n"
+              << "  -a, --address      IP address to bind to (default: 10.10.10.112)\n"
+              << "  -p, --port         Port to listen on (default: 12345)\n";
 }
 
 int main(int argc, char **argv)
@@ -29,16 +32,24 @@ int main(int argc, char **argv)
     // Default values
     std::string sensorPath = "/dev/ttyAMA0";
     int measuringInterval  = 10;
+    std::string ip_address = "10.10.10.112";
+    unsigned short port    = 12345;
 
     // Argument parsing using getopt
     int opt;
-    while ((opt = getopt(argc, argv, "s:i:")) != -1) {
+    while ((opt = getopt(argc, argv, "s:i:a:p:")) != -1) {
         switch (opt) {
         case 's':
             sensorPath = optarg;
             break;
         case 'i':
             measuringInterval = std::stoi(optarg);
+            break;
+        case 'a':
+            ip_address = optarg;
+            break;
+        case 'p':
+            port = static_cast<unsigned short>(std::stoi(optarg));
             break;
         default:
             printUsage(argv[0]);
@@ -59,7 +70,7 @@ int main(int argc, char **argv)
     Application application(sensor, db, std::chrono::seconds(measuringInterval));
 
     io_context ioContext;
-    ip::tcp::endpoint endpoint(ip::tcp::v4(), 12345);
+    ip::tcp::endpoint endpoint(ip::address::from_string(ip_address), port);
     Server server(ioContext, endpoint,
                   [&application](RequestData data, SendResponseCallback callback) {
                       SPDLOG_TRACE("DoTaskCallback");
