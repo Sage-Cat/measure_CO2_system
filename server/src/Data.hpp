@@ -25,4 +25,7 @@ using SendResponseCallback = std::function<void(ResponseData)>;
 // callback for Network layer to process data from client
 using DoTaskCallback = std::function<void(RequestData, SendResponseCallback)>;
 
+// callback for fetching outdoor CO2 from OpenWeatherMap
+using FetchOutdoorCO2TaskCallback = std::function<std::string(const std::string &)>;
+
 #endif
