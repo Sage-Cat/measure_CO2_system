@@ -8,15 +8,9 @@
     tools:context=".ChartFragment"
     android:id="@+id/chart_container">
 
-    <LinearLayout
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/lineChart"
         android:layout_width="match_parent"
-        android:layout_height="600dp"
-        android:orientation="horizontal">
-
-        <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/lineChart"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </LinearLayout>
+        android:layout_height="match_parent" />
 
 </LinearLayout>

@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.github.mikephil.charting.charts.LineChart
@@ -25,19 +26,19 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.text.SimpleDateFormat
 import java.util.Locale
 
+
 class ChartFragment : Fragment() {
 
     private lateinit var lineChart: LineChart
     private lateinit var apiService: ApiService
-    private val samplesIndoor = mutableListOf<CO2Sample>()
-    private val samplesOutdoor = mutableListOf<CO2Sample>()
-    private var requestsCompleted = 0
+    private val samples = mutableListOf<CO2Sample>()
+    val adapter = SampleAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Роздуваємо макет для цього фрагменту
+        // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_chart, container, false)
         lineChart = view.findViewById(R.id.lineChart)
 
@@ -46,50 +47,31 @@ class ChartFragment : Fragment() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.10.10.112:12345/")
+        val retrofit = Retrofit.Builder().baseUrl("http://10.10.10.112:12345/")
             .addConverterFactory(GsonConverterFactory.create())
-            .client(OkHttpClient.Builder().build())
-            .build()
+            .client(OkHttpClient.Builder().build()).build()
 
         apiService = retrofit.create(ApiService::class.java)
-        getSensorData("get_indoor", "", samplesIndoor)
-        getSensorData("get_outdoor", "", samplesOutdoor)
+        getSensorData("get_all", "")
 
         return view
     }
 
-    private fun drawChart(samplesIndoor: List<CO2Sample>, samplesOutdoor: List<CO2Sample>) {
-        val entriesIndoor = samplesIndoor.map { sample ->
-            val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(sample.datetime)?.time?.toFloat() ?: 0f
+    private fun drawChart(samples: List<CO2Sample>) {
+
+        val entries = samples.map { sample ->
+            val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(sample.datetime).time.toFloat()
             val co2Level = sample.co2Level.toFloat()
             Entry(timestamp, co2Level)
         }
 
-        val entriesOutdoor = samplesOutdoor.map { sample ->
-            val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).parse(sample.datetime)?.time?.toFloat() ?: 0f
-            val co2Level = sample.co2Level.toFloat()
-            Entry(timestamp, co2Level)
-        }
+        val lineDataSet = LineDataSet(entries, "CO2 Levels")
+        lineDataSet.color = Color.RED
+        lineDataSet.valueTextColor = Color.BLACK
+        lineDataSet.valueTextSize = 7f
+        lineDataSet.setDrawCircles(false)
 
-        val lineDataSetIndoor = LineDataSet(entriesIndoor, "Indoor CO2 Levels").apply {
-            color = Color.RED
-            valueTextColor = Color.BLACK
-            valueTextSize = 7f
-            setDrawCircles(false)
-            setDrawValues(false) // прибрати позначення точок
-        }
-
-        val lineDataSetOutdoor = LineDataSet(entriesOutdoor, "Outdoor CO2 Levels").apply {
-            color = Color.BLUE
-            valueTextColor = Color.BLACK
-            valueTextSize = 7f
-            setDrawCircles(false)
-            setDrawValues(false) // прибрати позначення точок
-        }
-
-        val lineData = LineData(lineDataSetIndoor, lineDataSetOutdoor)
+        val lineData = LineData(lineDataSet)
         lineChart.data = lineData
         lineChart.description = Description().apply {
             text = "CO2 Measuring"
@@ -100,7 +82,6 @@ class ChartFragment : Fragment() {
         xAxis.valueFormatter = DateAxisValueFormatter()
         xAxis.granularity = 3600000f
         xAxis.labelRotationAngle = 45f
-        xAxis.yOffset = 10f // зсув підписів вгору
 
         lineChart.axisRight.isEnabled = false
         val yAxisLeft = lineChart.axisLeft
@@ -109,8 +90,7 @@ class ChartFragment : Fragment() {
         lineChart.invalidate()
     }
 
-
-    private fun getSensorData(command: String, param1: String, sampleList: MutableList<CO2Sample>) {
+    private fun getSensorData(command: String, param1: String) {
         val comm = Command(command, param1)
         apiService.getSensorData(comm).enqueue(object : Callback<ResponseBody> {
             @SuppressLint("NotifyDataSetChanged")
@@ -118,34 +98,38 @@ class ChartFragment : Fragment() {
                 if (response.isSuccessful) {
                     response.body()?.let { body ->
                         val json = body.string()
+                        adapter.clear()
                         if (json.isNotEmpty()) {
                             val jsonArray = JSONArray(json)
-                            sampleList.clear()
+                            samples.clear()
                             for (i in 0 until jsonArray.length()) {
                                 val jsonObject = jsonArray.getJSONObject(i)
                                 val datetime = jsonObject.getString("datetime")
                                 val co2Level = jsonObject.getString("CO2Level")
-                                val co2Sample = CO2Sample(datetime, co2Level)
-                                sampleList.add(co2Sample)
+                                val sample = CO2Sample(datetime, co2Level)
+                                samples.add(sample)
                             }
-                            requestsCompleted++
-                            if (requestsCompleted == 2) {
-                                drawChart(samplesIndoor, samplesOutdoor)
+
+                            for (sample in samples) {
+                                adapter.addSample(sample)
                             }
+                            drawChart(samples)
                         } else {
-                            // Обробка порожньої відповіді JSON
+                            //TODO: Обробка помилки
                         }
                     }
                 } else {
-                    // Обробка неуспішної відповіді
+                    //TODO: Обробка помилки
                 }
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                // Обробка помилки
+                //TODO: Обробка помилки
             }
         })
     }
+
+
 
     companion object {
         fun newInstance() = ChartFragment()
