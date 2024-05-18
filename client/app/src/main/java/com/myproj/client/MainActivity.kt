@@ -1,37 +1,14 @@
 package com.myproj.client
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import okhttp3.OkHttpClient
-import okhttp3.ResponseBody
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.util.Calendar
-import android.app.DatePickerDialog
-import android.graphics.Color
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.components.Description
-import com.github.mikephil.charting.components.Legend
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.myproj.client.databinding.ActivityMainBinding
-import org.json.JSONArray
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import com.myproj.client.fragments.ChartFragment
+import com.myproj.client.fragments.MainFragment
+import com.myproj.client.fragments.SettingsFragment
+import com.myproj.client.network.ApiClient
 
 class MainActivity : AppCompatActivity() {
 
@@ -42,6 +19,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         bindingClass = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bindingClass.root)
+        //ApiClient.apiService
         replaceFragment(MainFragment())
 
         bindingClass.bottomNavigationView.setOnItemSelectedListener {
