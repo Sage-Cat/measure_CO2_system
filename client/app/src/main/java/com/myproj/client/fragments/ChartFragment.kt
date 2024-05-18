@@ -1,4 +1,4 @@
-package com.myproj.client
+package com.myproj.client.fragments
 
 import android.annotation.SuppressLint
 import android.graphics.Color
@@ -14,14 +14,17 @@ import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import okhttp3.OkHttpClient
+import com.myproj.client.CO2Sample
+import com.myproj.client.DateAxisValueFormatter
+import com.myproj.client.R
+import com.myproj.client.network.ApiClient
+import com.myproj.client.network.ApiService
+import com.myproj.client.network.Command
 import okhttp3.ResponseBody
 import org.json.JSONArray
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -37,9 +40,11 @@ class ChartFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Роздуваємо макет для цього фрагменту
+
         val view = inflater.inflate(R.layout.fragment_chart, container, false)
         lineChart = view.findViewById(R.id.lineChart)
+
+        apiService = ApiClient.apiService
 
         ViewCompat.setOnApplyWindowInsetsListener(view.findViewById(R.id.chart_container)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -47,13 +52,6 @@ class ChartFragment : Fragment() {
             insets
         }
 
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://10.10.10.112:12345/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(OkHttpClient.Builder().build())
-            .build()
-
-        apiService = retrofit.create(ApiService::class.java)
         getSensorData("get_indoor", "", samplesIndoor)
         getSensorData("get_outdoor", "", samplesOutdoor)
 
