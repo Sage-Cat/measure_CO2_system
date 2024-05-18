@@ -1,4 +1,4 @@
-package com.myproj.client
+package com.myproj.client.fragments
 
 import android.annotation.SuppressLint
 import android.app.DatePickerDialog
@@ -13,16 +13,17 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.github.mikephil.charting.charts.LineChart
-import com.myproj.client.databinding.ActivityMainBinding
-import okhttp3.OkHttpClient
+import com.myproj.client.CO2Sample
+import com.myproj.client.R
+import com.myproj.client.SampleAdapter
+import com.myproj.client.network.ApiClient
+import com.myproj.client.network.ApiService
+import com.myproj.client.network.Command
 import okhttp3.ResponseBody
 import org.json.JSONArray
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import java.util.Calendar
 
 class MainFragment : Fragment() {
@@ -41,6 +42,8 @@ class MainFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_main, container, false)
 
         textView1 = view.findViewById(R.id.tvSelectedDate)
+
+        apiService = ApiClient.apiService
 
         val recView = view.findViewById<RecyclerView>(R.id.recView)
         recView.layoutManager = LinearLayoutManager(requireContext())
@@ -64,12 +67,6 @@ class MainFragment : Fragment() {
             getSensorData("get_indoor_after", selectedDate)
         }
 
-
-        val retrofit = Retrofit.Builder().baseUrl("http://192.168.31.142:12345/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(OkHttpClient.Builder().build()).build()
-
-        apiService = retrofit.create(ApiService::class.java)
         getSensorData("get_indoor", "")
 
         return view

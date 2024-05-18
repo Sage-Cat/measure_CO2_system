@@ -1,4 +1,4 @@
-package com.myproj.client
+package com.myproj.client.network
 
 import okhttp3.ResponseBody
 import retrofit2.Call

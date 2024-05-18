@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="#CBCDFB"
     android:textAlignment="center"
-    tools:context=".MainFragment">
+    tools:context=".fragments.MainFragment">
 
     <TextView
         android:id="@+id/textView"
