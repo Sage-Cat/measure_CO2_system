@@ -7,26 +7,29 @@
 #include <unistd.h>
 #include <vector>
 
-#include "Application/Application.hpp"
-#include "CO2Sensor/CO2Sensor.hpp"
-#include "Database/SQLiteDatabase.hpp"
+#include "Application.hpp"
+#include "Devices/CO2Sensor.hpp"
+#include "Devices/LED.hpp"
 #include "Network/Server.hpp"
+#include "Database/SQLiteDatabase.hpp"
+
 #include "SpdlogConfig.hpp"
 
 using namespace boost::asio;
 
 void printUsage(const char *progName)
 {
-    std::cout
-        << "Usage: " << progName
-        << " [-s sensorPath] [-i measuringInterval] [-a ipAddress] [-p port] [-k apiKeyFilePath]\n"
-        << "Options:\n"
-        << "  -s, --sensor       Sensor path (default: /dev/ttyAMA0)\n"
-        << "  -i, --interval     Measuring interval in seconds (default: 10)\n"
-        << "  -a, --address      IP address to bind to (default: 10.10.10.112)\n"
-        << "  -p, --port         Port to listen on (default: 12345)\n"
-        << "  -k, --apikey       Path to the OpenWeather API key file (default: "
-           "./open_weather_api.txt)\n";
+    std::cout << "Usage: " << progName
+              << " [-s sensorPath] [-i measuringInterval] [-a ipAddress] [-p port] [-k "
+                 "apiKeyFilePath] [-l ledPin]\n"
+              << "Options:\n"
+              << "  -a, --address      IP address to bind to (default: 10.10.10.112)\n"
+              << "  -p, --port         Port to listen on (default: 12345)\n"
+              << "  -s, --sensor       Sensor path (default: /dev/ttyAMA0)\n"
+              << "  -i, --interval     Measuring interval in seconds (default: 10)\n"
+              << "  -k, --apikey       Path to the OpenWeather API key file (default: "
+                 "./open_weather_api.txt)\n"
+              << "  -l, --led          GPIO pin for the LED (default: 18)\n";
 }
 
 std::string readApiKeyFromFile(const std::string &filePath)
@@ -56,10 +59,11 @@ int main(int argc, char **argv)
     std::string ip_address     = "10.10.10.112";
     unsigned short port        = 12345;
     std::string apiKeyFilePath = "./open_weather_api_key.txt";
+    int ledPin                 = 18;
 
     // Argument parsing using getopt
     int opt;
-    while ((opt = getopt(argc, argv, "s:i:a:p:k:")) != -1) {
+    while ((opt = getopt(argc, argv, "s:i:a:p:k:l:")) != -1) {
         switch (opt) {
         case 's':
             sensorPath = optarg;
@@ -75,6 +79,9 @@ int main(int argc, char **argv)
             break;
         case 'k':
             apiKeyFilePath = optarg;
+            break;
+        case 'l':
+            ledPin = std::stoi(optarg);
             break;
         default:
             printUsage(argv[0]);
@@ -97,11 +104,11 @@ int main(int argc, char **argv)
     }
 
     // Main logic
-    SQLiteDatabase db(DATABASE_FILE_PATH); // create/open db near exe file
-
+    SQLiteDatabase db(DATABASE_FILE_PATH);
     CO2Sensor sensor(sensorPath);
+    LED led(ledPin);
 
-    Application application(sensor, db, std::chrono::seconds(measuringInterval));
+    Application application(sensor, led, db, std::chrono::seconds(measuringInterval));
 
     io_context ioContext;
     ip::tcp::endpoint endpoint(ip::address::from_string(ip_address), port);
