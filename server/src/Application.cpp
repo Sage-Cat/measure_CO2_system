@@ -10,8 +10,7 @@
 Application::Application(CO2Sensor &co2Sensor, LED &led, SQLiteDatabase &db,
                          std::chrono::seconds measuring_interval)
     : sensor_(co2Sensor), led_(led), db_(db), stopThreads_(false),
-      measuringInterval_(measuring_interval), sensorThread_([this]() { this->sensorTask(); }),
-      outdoorThread_([this]() { this->outdoorTask(); })
+      measuringInterval_(measuring_interval)
 {
     SPDLOG_TRACE("Application::Application");
 }
@@ -53,6 +52,14 @@ void Application::doTask(RequestData data, SendResponseCallback callback)
 void Application::setFetchOutdoorCO2Callback(FetchOutdoorCO2TaskCallback callback)
 {
     fetchOutdoorCO2Callback_ = callback;
+}
+
+void Application::startTasks()
+{
+    SPDLOG_TRACE("Application::startThreads");
+
+    sensorThread_  = std::thread([this]() { this->sensorTask(); });
+    outdoorThread_ = std::thread([this]() { this->outdoorTask(); });
 }
 
 void Application::sensorTask()

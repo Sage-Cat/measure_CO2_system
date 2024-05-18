@@ -16,12 +16,13 @@ class SQLiteDatabase;
 
 class Application {
 public:
-    Application(CO2Sensor &co2Sensor, LED &led, SQLiteDatabase &db, std::chrono::seconds measuring_interval);
+    Application(CO2Sensor &co2Sensor, LED &led, SQLiteDatabase &db,
+                std::chrono::seconds measuring_interval);
     ~Application();
 
     void doTask(RequestData data, SendResponseCallback callback);
-
     void setFetchOutdoorCO2Callback(FetchOutdoorCO2TaskCallback callback);
+    void startTasks();
 
 private:
     void sensorTask();
