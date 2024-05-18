@@ -1,16 +1,17 @@
 #include "Application.hpp"
 
-#include "CO2Sensor/CO2Sensor.hpp"
 #include "Database/SQLiteDatabase.hpp"
+#include "Devices/CO2Sensor.hpp"
+#include "Devices/LED.hpp"
 
 #include "SpdlogConfig.hpp"
 #include "Utils.hpp"
 
-Application::Application(CO2Sensor &co2Sensor, SQLiteDatabase &db,
+Application::Application(CO2Sensor &co2Sensor, LED &led, SQLiteDatabase &db,
                          std::chrono::seconds measuring_interval)
-    : sensor_(co2Sensor), db_(db), stopThreads_(false), measuringInterval_(measuring_interval),
-      sensorThread_([this]() { this->sensorTask(); }),
-      outdoorThread_([this]() { this->outdoorCO2Task(); })
+    : sensor_(co2Sensor), led_(led), db_(db), stopThreads_(false),
+      measuringInterval_(measuring_interval), sensorThread_([this]() { this->sensorTask(); }),
+      outdoorThread_([this]() { this->outdoorTask(); })
 {
     SPDLOG_TRACE("Application::Application");
 }
@@ -38,6 +39,10 @@ void Application::doTask(RequestData data, SendResponseCallback callback)
         resData.measurements = db_.getIndoorCO2SamplesAfterDatetime(data.param1);
     } else if (data.cmd == "get_outdoor") {
         resData.measurements = db_.getOutdoorCO2Samples();
+    } else if (data.cmd == "warning_on") {
+        led_.on();
+    } else if (data.cmd == "warning_off") {
+        led_.off();
     } else {
         SPDLOG_WARN("Application::doTask | unknown cmd");
     }
@@ -67,9 +72,9 @@ void Application::sensorTask()
     }
 }
 
-void Application::outdoorCO2Task()
+void Application::outdoorTask()
 {
-    SPDLOG_TRACE("Application::outdoorCO2Task");
+    SPDLOG_TRACE("Application::outdoorTask");
     try {
         while (!stopThreads_) {
             if (fetchOutdoorCO2Callback_) {
@@ -84,6 +89,6 @@ void Application::outdoorCO2Task()
             std::this_thread::sleep_for(measuringInterval_);
         }
     } catch (const std::exception &e) {
-        SPDLOG_ERROR("Exception in outdoorCO2Task: {}", e.what());
+        SPDLOG_ERROR("Exception in outdoorTask: {}", e.what());
     }
 }

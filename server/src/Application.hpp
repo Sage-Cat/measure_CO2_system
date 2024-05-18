@@ -11,11 +11,12 @@
 #include "Data.hpp"
 
 class CO2Sensor;
+class LED;
 class SQLiteDatabase;
 
 class Application {
 public:
-    Application(CO2Sensor &co2Sensor, SQLiteDatabase &db, std::chrono::seconds measuring_interval);
+    Application(CO2Sensor &co2Sensor, LED &led, SQLiteDatabase &db, std::chrono::seconds measuring_interval);
     ~Application();
 
     void doTask(RequestData data, SendResponseCallback callback);
@@ -24,11 +25,12 @@ public:
 
 private:
     void sensorTask();
-    void outdoorCO2Task();
+    void outdoorTask();
     std::string getCurrentDateTime();
 
 private:
     CO2Sensor &sensor_;
+    LED &led_;
     SQLiteDatabase &db_;
 
     std::thread sensorThread_;
