@@ -139,7 +139,8 @@ std::vector<CO2Sample> SQLiteDatabase::getOutdoorCO2Samples()
     return measurements;
 }
 
-std::vector<CO2Sample> SQLiteDatabase::getIndoorCO2SamplesAfterDatetime(const std::string &dateAfter)
+std::vector<CO2Sample>
+SQLiteDatabase::getIndoorCO2SamplesAfterDatetime(const std::string &dateAfter)
 {
     SPDLOG_TRACE("SQLiteDatabase::getIndoorCO2SamplesAfterDatetime | datetime - {}", dateAfter);
     const std::string sql = "SELECT datetime, CO2Level FROM IndoorCO2 WHERE datetime > ?;";

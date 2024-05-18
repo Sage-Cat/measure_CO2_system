@@ -13,10 +13,10 @@
 
 static std::atomic<unsigned int> nextSessionId{1};
 
-namespace beast = boost::beast; 
-namespace http  = beast::http;  
-namespace net   = boost::asio;  
-using tcp       = net::ip::tcp; 
+namespace beast = boost::beast;
+namespace http  = beast::http;
+namespace net   = boost::asio;
+using tcp       = net::ip::tcp;
 
 Server::Server(boost::asio::io_context &io_context, const boost::asio::ip::tcp::endpoint &endpoint,
                const std::string &openWeatherApiKey, DoTaskCallback procDataCallback)

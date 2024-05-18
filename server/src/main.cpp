@@ -8,10 +8,10 @@
 #include <vector>
 
 #include "Application.hpp"
+#include "Database/SQLiteDatabase.hpp"
 #include "Devices/CO2Sensor.hpp"
 #include "Devices/LED.hpp"
 #include "Network/Server.hpp"
-#include "Database/SQLiteDatabase.hpp"
 
 #include "SpdlogConfig.hpp"
 
@@ -122,6 +122,7 @@ int main(int argc, char **argv)
         SPDLOG_TRACE("FetchOutdoorCO2Callback");
         return server.fetchOutdoorCO2Level(location);
     });
+    application.startTasks();
 
     ioContext.run();
     return 0;

@@ -20,6 +20,7 @@ public:
 private:
     void doRead();
     void doWrite(const std::string &response);
+    void doClose();
 
 private:
     boost::asio::ip::tcp::socket socket_;
