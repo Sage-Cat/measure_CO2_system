@@ -9,4 +9,8 @@
         android:title="Chart"
         android:icon="@drawable/baseline_ssid_chart_24"
         android:id="@+id/chart"/>
+    <item
+        android:title="Settings"
+        android:icon="@drawable/outline_settings_24"
+        android:id="@+id/settings"/>
 </menu>
