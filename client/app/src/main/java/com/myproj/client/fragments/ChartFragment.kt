@@ -20,6 +20,7 @@ import com.myproj.client.R
 import com.myproj.client.network.ApiClient
 import com.myproj.client.network.ApiService
 import com.myproj.client.network.Command
+import com.myproj.client.network.SensorDataCallback
 import okhttp3.ResponseBody
 import org.json.JSONArray
 import retrofit2.Call
@@ -31,7 +32,6 @@ import java.util.Locale
 class ChartFragment : Fragment() {
 
     private lateinit var lineChart: LineChart
-    private lateinit var apiService: ApiService
     private val samplesIndoor = mutableListOf<CO2Sample>()
     private val samplesOutdoor = mutableListOf<CO2Sample>()
     private var requestsCompleted = 0
@@ -44,16 +44,14 @@ class ChartFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_chart, container, false)
         lineChart = view.findViewById(R.id.lineChart)
 
-        apiService = ApiClient.apiService
-
         ViewCompat.setOnApplyWindowInsetsListener(view.findViewById(R.id.chart_container)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        getSensorData("get_indoor", "", samplesIndoor)
-        getSensorData("get_outdoor", "", samplesOutdoor)
+        getSensorData("get_indoor", samplesIndoor)
+        getSensorData("get_outdoor", samplesOutdoor)
 
         return view
     }
@@ -107,43 +105,23 @@ class ChartFragment : Fragment() {
         lineChart.invalidate()
     }
 
-
-    private fun getSensorData(command: String, param1: String, sampleList: MutableList<CO2Sample>) {
-        val comm = Command(command, param1)
-        apiService.getSensorData(comm).enqueue(object : Callback<ResponseBody> {
-            @SuppressLint("NotifyDataSetChanged")
-            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                if (response.isSuccessful) {
-                    response.body()?.let { body ->
-                        val json = body.string()
-                        if (json.isNotEmpty()) {
-                            val jsonArray = JSONArray(json)
-                            sampleList.clear()
-                            for (i in 0 until jsonArray.length()) {
-                                val jsonObject = jsonArray.getJSONObject(i)
-                                val datetime = jsonObject.getString("datetime")
-                                val co2Level = jsonObject.getString("CO2Level")
-                                val co2Sample = CO2Sample(datetime, co2Level)
-                                sampleList.add(co2Sample)
-                            }
-                            requestsCompleted++
-                            if (requestsCompleted == 2) {
-                                drawChart(samplesIndoor, samplesOutdoor)
-                            }
-                        } else {
-                            // Обробка порожньої відповіді JSON
-                        }
-                    }
-                } else {
-                    // Обробка неуспішної відповіді
+    private fun getSensorData(command: String, sampleList: MutableList<CO2Sample>) {
+        ApiClient.getSensorData(command, "", object : SensorDataCallback {
+            override fun onSuccess(samples: List<CO2Sample>) {
+                sampleList.clear()
+                sampleList.addAll(samples)
+                requestsCompleted++
+                if (requestsCompleted == 2) {
+                    drawChart(samplesIndoor, samplesOutdoor)
                 }
             }
 
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                // Обробка помилки
+            override fun onFailure(t: Throwable) {
+                // Handle failure
             }
         })
     }
+
 
     companion object {
         fun newInstance() = ChartFragment()

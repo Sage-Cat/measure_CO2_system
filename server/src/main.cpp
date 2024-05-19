@@ -53,6 +53,8 @@ int main(int argc, char **argv)
 {
     SpdlogConfig::init<SpdlogConfig::LogLevel::Trace>();
 
+    const std::string newHostname = "co2measure.local";
+
     // Default values
     std::string sensorPath     = "/dev/ttyAMA0";
     int measuringInterval      = 10;
@@ -94,12 +96,17 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
+<<<<<<< HEAD
     // Read the OpenWeather API key
     std::string openWeatherApiKey{};
     try {
         openWeatherApiKey = readApiKeyFromFile(apiKeyFilePath);
     } catch (const std::exception &e) {
         std::cerr << e.what() << '\n';
+=======
+    if (std::system(("sudo hostnamectl set-hostname " + newHostname).c_str()) != 0) {
+         std::cerr << "Error setting hostname. Please check for sufficient permissions.\n";
+>>>>>>> b89ddd5 (Implemented singleton pattern for network connection)
         return EXIT_FAILURE;
     }
 
