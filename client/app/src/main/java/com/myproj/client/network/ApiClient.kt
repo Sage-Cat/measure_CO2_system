@@ -2,6 +2,7 @@ package com.myproj.client.network
 
 import android.util.Log
 import com.myproj.client.CO2Sample
+import com.myproj.client.SensorDataAnalyzer
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -44,6 +45,10 @@ object ApiClient {
                                 val sample = CO2Sample(datetime, co2Level)
                                 samples.add(sample)
                             }
+                            if (command != "get_outdoor"){
+                                val analyzer = SensorDataAnalyzer()
+                                analyzer.onDataReceived(samples)
+                            }
                             callback.onSuccess(samples)
                         } else {
                             callback.onFailure(Throwable("Empty data"))
@@ -55,6 +60,25 @@ object ApiClient {
             }
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 callback.onFailure(t)
+            }
+        })
+    }
+
+    fun controlLed(command: String) {
+        val comm = Command(command, "")
+        Log.d("ApiClient", "Sending request to $command the LED")
+
+        apiService.controlLed(comm).enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                if (response.isSuccessful) {
+                    Log.d("ApiClient", "LED control command successful")
+                } else {
+                    val errorBody = response.errorBody()?.string()
+                    Log.e("ApiClient", "LED control failed: $errorBody")
+                }
+            }
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Log.e("ApiClient", "LED control request failed", t)
             }
         })
     }
