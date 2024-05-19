@@ -112,11 +112,6 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    if (std::system(("sudo hostnamectl set-hostname " + hostname).c_str()) != 0) {
-        std::cerr << "Error setting hostname. Please check for sufficient permissions.\n";
-        return EXIT_FAILURE;
-    }
-
     // Main logic
     SQLiteDatabase db(DATABASE_FILE_PATH);
     CO2Sensor sensor(sensorPath);
