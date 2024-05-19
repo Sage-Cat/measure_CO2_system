@@ -32,7 +32,10 @@ void Session::doRead()
         socket_, buffer_, *req,
         [this, self, req](beast::error_code ec, std::size_t bytes_transferred) {
             if (ec) {
-                SPDLOG_ERROR("Session {}: Read error: {}", sessionId_, ec.message());
+                if (ec != http::error::end_of_stream) {
+                    SPDLOG_ERROR("Session {}: Read error: {}", sessionId_, ec.message());
+                }
+                doClose();
                 return;
             }
 
@@ -87,9 +90,19 @@ void Session::doWrite(const std::string &response)
     http::async_write(socket_, *res, [this, self, res](beast::error_code ec, std::size_t) {
         if (!ec) {
             SPDLOG_INFO("Session {}: Data written successfully", sessionId_);
-            doRead();
+            doClose();
         } else {
             SPDLOG_ERROR("Session {}: Write error: {}", sessionId_, ec.message());
         }
     });
+}
+
+void Session::doClose()
+{
+    SPDLOG_TRACE("Session::doClose");
+    beast::error_code ec;
+    socket_.shutdown(tcp::socket::shutdown_send, ec);
+    if (ec && ec != beast::errc::not_connected) {
+        SPDLOG_ERROR("Session {}: Shutdown error: {}", sessionId_, ec.message());
+    }
 }

@@ -13,4 +13,5 @@
         android:title="Settings"
         android:icon="@drawable/outline_settings_24"
         android:id="@+id/settings"/>
+
 </menu>

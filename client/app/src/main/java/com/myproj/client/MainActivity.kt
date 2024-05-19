@@ -1,5 +1,6 @@
 package com.myproj.client
 
+
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -25,6 +26,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.main -> replaceFragment(MainFragment())
                 R.id.chart -> replaceFragment(ChartFragment())
                 R.id.settings -> replaceFragment(SettingsFragment())
+
                 else -> {}
             }
             true
@@ -32,6 +34,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun replaceFragment(fragment: Fragment) {
+
         val fragmentManager = supportFragmentManager
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.frameLayout, fragment)

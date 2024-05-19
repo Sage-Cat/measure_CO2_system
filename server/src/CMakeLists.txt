@@ -6,16 +6,20 @@ find_package(SQLite3 REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(GPIOD REQUIRED libgpiod)
+
 include_directories(${Boost_INCLUDE_DIRS} ${SQLite3_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 set(SOURCES
-    Application/Application.cpp
-    CO2Sensor/CO2Sensor.cpp
+    Devices/CO2Sensor.cpp
+    Devices/LED.cpp
     Database/SQLiteDatabase.cpp
     Network/Server.cpp
     Network/Session.cpp
     Network/JsonSerialization.hpp
+    Application.cpp
     main.cpp
 )
 
@@ -24,6 +28,7 @@ add_executable(MeasuringServer ${SOURCES})
 target_link_libraries(MeasuringServer 
     ${Boost_LIBRARIES} 
     ${SQLite3_LIBRARIES} 
+    ${GPIOD_LIBRARIES}
     spdlog::spdlog 
     nlohmann_json::nlohmann_json
     pthread

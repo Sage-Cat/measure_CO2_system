@@ -1,12 +1,11 @@
 #ifndef SQLITE_DATABASE_HPP
 #define SQLITE_DATABASE_HPP
 
-#include <memory>
-
-#include <boost/noncopyable.hpp>
-#include <sqlite3.h>
-
 #include "Data.hpp"
+#include <boost/noncopyable.hpp>
+#include <memory>
+#include <sqlite3.h>
+#include <vector>
 
 class SQLiteDatabase : private boost::noncopyable {
 public:
@@ -14,8 +13,11 @@ public:
     ~SQLiteDatabase() = default;
 
     bool initDatabaseSchema();
-    bool addMeasurement(const CO2Sample &sample);
-    std::vector<CO2Sample> getMeasurementsAfterDate(const std::string &dateAfter);
+    bool addIndoorCO2Sample(const CO2Sample &sample);
+    bool addOutdoorCO2Sample(const CO2Sample &sample);
+    std::vector<CO2Sample> getIndoorCO2Samples();
+    std::vector<CO2Sample> getOutdoorCO2Samples();
+    std::vector<CO2Sample> getIndoorCO2SamplesAfterDatetime(const std::string &dateAfter);
 
 private:
     struct StatementDeleter {
