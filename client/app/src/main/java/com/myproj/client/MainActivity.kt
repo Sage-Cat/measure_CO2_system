@@ -8,7 +8,6 @@ import com.myproj.client.databinding.ActivityMainBinding
 import com.myproj.client.fragments.ChartFragment
 import com.myproj.client.fragments.MainFragment
 import com.myproj.client.fragments.SettingsFragment
-import com.myproj.client.network.ApiClient
 
 class MainActivity : AppCompatActivity() {
 
@@ -19,7 +18,6 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         bindingClass = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bindingClass.root)
-        //ApiClient.apiService
         replaceFragment(MainFragment())
 
         bindingClass.bottomNavigationView.setOnItemSelectedListener {
@@ -34,7 +32,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun replaceFragment(fragment: Fragment) {
-
         val fragmentManager = supportFragmentManager
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.frameLayout, fragment)
