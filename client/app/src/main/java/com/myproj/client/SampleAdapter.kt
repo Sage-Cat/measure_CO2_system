@@ -38,4 +38,5 @@ class SampleAdapter : RecyclerView.Adapter<SampleAdapter.SampleHolder>() {
         sampleList.add(sample)
         notifyDataSetChanged()
     }
+
 }

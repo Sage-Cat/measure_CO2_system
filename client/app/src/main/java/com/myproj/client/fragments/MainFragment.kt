@@ -17,19 +17,12 @@ import com.myproj.client.CO2Sample
 import com.myproj.client.R
 import com.myproj.client.SampleAdapter
 import com.myproj.client.network.ApiClient
-import com.myproj.client.network.ApiService
-import com.myproj.client.network.Command
-import okhttp3.ResponseBody
-import org.json.JSONArray
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.myproj.client.network.SensorDataCallback
 import java.util.Calendar
 
 class MainFragment : Fragment() {
 
     private var selectedDate = ""
-    private lateinit var apiService: ApiService
     private val samples = mutableListOf<CO2Sample>()
     private lateinit var textView1: TextView
     val adapter = SampleAdapter()
@@ -42,8 +35,6 @@ class MainFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_main, container, false)
 
         textView1 = view.findViewById(R.id.tvSelectedDate)
-
-        apiService = ApiClient.apiService
 
         val recView = view.findViewById<RecyclerView>(R.id.recView)
         recView.layoutManager = LinearLayoutManager(requireContext())
@@ -92,39 +83,17 @@ class MainFragment : Fragment() {
 
 
     private fun getSensorData(command: String, param1: String) {
-        val comm = Command(command, param1)
-        apiService.getSensorData(comm).enqueue(object : Callback<ResponseBody> {
-            @SuppressLint("NotifyDataSetChanged")
-            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                if (response.isSuccessful) {
-                    response.body()?.let { body ->
-                        val json = body.string()
-                        adapter.clear()
-                        if (json.isNotEmpty()) {
-                            val jsonArray = JSONArray(json)
-                            samples.clear()
-                            for (i in 0 until jsonArray.length()) {
-                                val jsonObject = jsonArray.getJSONObject(i)
-                                val datetime = jsonObject.getString("datetime")
-                                val co2Level = jsonObject.getString("CO2Level")
-                                val sample = CO2Sample(datetime, co2Level)
-                                samples.add(sample)
-                            }
-
-                            for (sample in samples) {
-                                adapter.addSample(sample)
-                            }
-                        } else {
-                            //TODO: Обробка помилки
-                        }
-                    }
-                } else {
-                    //TODO: Обробка помилки
+        ApiClient.getSensorData(command, param1, object : SensorDataCallback {
+            override fun onSuccess(samples: List<CO2Sample>) {
+                this@MainFragment.samples.clear()
+                this@MainFragment.samples.addAll(samples)
+                adapter.clear()
+                for (sample in samples) {
+                    adapter.addSample(sample)
                 }
             }
-
-            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                //TODO: Обробка помилки
+            override fun onFailure(t: Throwable) {
+                //TODO: Handle failure
             }
         })
     }

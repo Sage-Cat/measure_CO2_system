@@ -26,6 +26,8 @@ int main(int argc, char **argv)
 {
     SpdlogConfig::init<SpdlogConfig::LogLevel::Trace>();
 
+    const std::string newHostname = "co2measure.local";
+
     // Default values
     std::string sensorPath = "/dev/ttyAMA0";
     int measuringInterval  = 10;
@@ -48,6 +50,11 @@ int main(int argc, char **argv)
 
     if (measuringInterval <= 0) {
         std::cerr << "Measuring interval must be a positive integer.\n";
+        return EXIT_FAILURE;
+    }
+
+    if (std::system(("sudo hostnamectl set-hostname " + newHostname).c_str()) != 0) {
+         std::cerr << "Error setting hostname. Please check for sufficient permissions.\n";
         return EXIT_FAILURE;
     }
 
