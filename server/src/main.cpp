@@ -20,10 +20,9 @@ using namespace boost::asio;
 void printUsage(const char *progName)
 {
     std::cout << "Usage: " << progName
-              << " [-s sensorPath] [-i measuringInterval] [-a ipAddress] [-p port] [-k "
+              << " [-s sensorPath] [-i measuringInterval] [-p port] [-k "
                  "apiKeyFilePath] [-l ledPin]\n"
               << "Options:\n"
-              << "  -a, --address      IP address to bind to (default: 10.10.10.112)\n"
               << "  -p, --port         Port to listen on (default: 12345)\n"
               << "  -s, --sensor       Sensor path (default: /dev/ttyAMA0)\n"
               << "  -i, --interval     Measuring interval in seconds (default: 10)\n"
@@ -58,23 +57,19 @@ int main(int argc, char **argv)
     // Default values
     std::string sensorPath     = "/dev/ttyAMA0";
     int measuringInterval      = 10;
-    std::string ip_address     = "10.10.10.112";
     unsigned short port        = 12345;
     std::string apiKeyFilePath = "./open_weather_api_key.txt";
     int ledPin                 = 18;
 
     // Argument parsing using getopt
     int opt;
-    while ((opt = getopt(argc, argv, "s:i:a:p:k:l:")) != -1) {
+    while ((opt = getopt(argc, argv, "s:i:p:k:l:")) != -1) {
         switch (opt) {
         case 's':
             sensorPath = optarg;
             break;
         case 'i':
             measuringInterval = std::stoi(optarg);
-            break;
-        case 'a':
-            ip_address = optarg;
             break;
         case 'p':
             port = static_cast<unsigned short>(std::stoi(optarg));
@@ -96,9 +91,19 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    if (std::system(("sudo hostnamectl set-hostname " + newHostname).c_str()) != 0) {
-         std::cerr << "Error setting hostname. Please check for sufficient permissions.\n";
-         
+    int status = std::system(("sudo hostnamectl set-hostname " + newHostname).c_str());
+    if (status != 0) {
+        std::cerr << "Error setting hostname. Status: " << status << ". Error: " << strerror(errno)
+                  << '\n';
+        return EXIT_FAILURE;
+    }
+    status = std::system("sudo systemctl restart avahi-daemon");
+    if (status != 0) {
+        std::cerr << "Error restarting avahi-daemon. Status: " << status
+                  << ". Error: " << strerror(errno) << '\n';
+        return EXIT_FAILURE;
+    }
+    
     // Read the OpenWeather API key
     std::string openWeatherApiKey{};
     try {
@@ -116,7 +121,7 @@ int main(int argc, char **argv)
     Application application(sensor, led, db, std::chrono::seconds(measuringInterval));
 
     io_context ioContext;
-    ip::tcp::endpoint endpoint(ip::address::from_string(ip_address), port);
+    ip::tcp::endpoint endpoint(ip::tcp::v4(), port);
     Server server(ioContext, endpoint, openWeatherApiKey,
                   [&application](RequestData data, SendResponseCallback callback) {
                       SPDLOG_TRACE("DoTaskCallback");
