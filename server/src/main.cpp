@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 {
     SpdlogConfig::init<SpdlogConfig::LogLevel::Trace>();
 
-    const std::string newHostname = "co2measure.local";
+    const std::string hostname = "co2measure.local";
 
     // Default values
     std::string sensorPath     = "/dev/ttyAMA0";
@@ -87,23 +87,28 @@ int main(int argc, char **argv)
     }
 
     if (measuringInterval <= 0) {
-        std::cerr << "Measuring interval must be a positive integer.\n";
+        SPDLOG_ERROR("Measuring interval must be a positive integer.");
         return EXIT_FAILURE;
     }
 
-    int status = std::system(("sudo hostnamectl set-hostname " + newHostname).c_str());
+    // ---Network Configuration Update---
+
+    // Sets a new hostname using hostnamectl for using mDNS
+    int status = std::system(("sudo hostnamectl set-hostname " + hostname).c_str());
     if (status != 0) {
-        std::cerr << "Error setting hostname. Status: " << status << ". Error: " << strerror(errno)
-                  << '\n';
+        SPDLOG_ERROR("Error setting hostname. Status: {}, Error: {}", status,
+                     strerror(errno));
         return EXIT_FAILURE;
     }
+
+    // Restarts the avahi-daemon service to apply changes and update network information
     status = std::system("sudo systemctl restart avahi-daemon");
     if (status != 0) {
-        std::cerr << "Error restarting avahi-daemon. Status: " << status
-                  << ". Error: " << strerror(errno) << '\n';
+        SPDLOG_ERROR("Error restarting avahi-daemon. Status: {}, Error: {}", status,
+                     strerror(errno));
         return EXIT_FAILURE;
     }
-    
+
     // Read the OpenWeather API key
     std::string openWeatherApiKey{};
     try {

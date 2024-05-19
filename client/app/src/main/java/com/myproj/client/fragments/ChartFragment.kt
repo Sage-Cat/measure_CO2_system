@@ -2,6 +2,7 @@ package com.myproj.client.fragments
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -116,7 +117,7 @@ class ChartFragment : Fragment() {
             }
 
             override fun onFailure(t: Throwable) {
-                // Handle failure
+                Log.e("ChartFragment", "Failed to get data: $t")
             }
         })
     }
