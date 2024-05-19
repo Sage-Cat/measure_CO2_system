@@ -20,10 +20,8 @@ using namespace boost::asio;
 void printUsage(const char *progName)
 {
     std::cout << "Usage: " << progName
-              << " [-s sensorPath] [-i measuringInterval] [-p port] [-k "
-                 "apiKeyFilePath] [-l ledPin]\n"
+              << " [-s sensorPath] [-i measuringInterval] [-k apiKeyFilePath] [-l ledPin]\n"
               << "Options:\n"
-              << "  -p, --port         Port to listen on (default: 12345)\n"
               << "  -s, --sensor       Sensor path (default: /dev/ttyAMA0)\n"
               << "  -i, --interval     Measuring interval in seconds (default: 10)\n"
               << "  -k, --apikey       Path to the OpenWeather API key file (default: "
@@ -63,16 +61,13 @@ int main(int argc, char **argv)
 
     // Argument parsing using getopt
     int opt;
-    while ((opt = getopt(argc, argv, "s:i:p:k:l:")) != -1) {
+    while ((opt = getopt(argc, argv, "s:i:k:l:")) != -1) {
         switch (opt) {
         case 's':
             sensorPath = optarg;
             break;
         case 'i':
             measuringInterval = std::stoi(optarg);
-            break;
-        case 'p':
-            port = static_cast<unsigned short>(std::stoi(optarg));
             break;
         case 'k':
             apiKeyFilePath = optarg;
@@ -91,20 +86,12 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-    int status = std::system(("sudo hostnamectl set-hostname " + newHostname).c_str());
-=======
     // ---Network Configuration Update---
 
     // Sets a new hostname using hostnamectl for using mDNS
     int status = std::system(("sudo hostnamectl set-hostname " + hostname).c_str());
->>>>>>> 9016926 (General improvements)
     if (status != 0) {
-        SPDLOG_ERROR("Error setting hostname. Status: {}, Error: {}", status,
-                     strerror(errno));
+        SPDLOG_ERROR("Error setting hostname. Status: {}, Error: {}", status, strerror(errno));
         return EXIT_FAILURE;
     }
 
@@ -115,22 +102,18 @@ int main(int argc, char **argv)
                      strerror(errno));
         return EXIT_FAILURE;
     }
-<<<<<<< HEAD
-    
->>>>>>> 874d31a (Implemented mDNS, client requests for LED state)
-=======
 
->>>>>>> 9016926 (General improvements)
     // Read the OpenWeather API key
     std::string openWeatherApiKey{};
     try {
         openWeatherApiKey = readApiKeyFromFile(apiKeyFilePath);
     } catch (const std::exception &e) {
-        std::cerr << e.what() << '\n';
-=======
-    if (std::system(("sudo hostnamectl set-hostname " + newHostname).c_str()) != 0) {
-         std::cerr << "Error setting hostname. Please check for sufficient permissions.\n";
->>>>>>> b89ddd5 (Implemented singleton pattern for network connection)
+        SPDLOG_ERROR("Error openWeather api key: Error: {}", e.what());
+        return EXIT_FAILURE;
+    }
+
+    if (std::system(("sudo hostnamectl set-hostname " + hostname).c_str()) != 0) {
+        std::cerr << "Error setting hostname. Please check for sufficient permissions.\n";
         return EXIT_FAILURE;
     }
 
