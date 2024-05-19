@@ -12,4 +12,8 @@ interface ApiService {
     @Headers("Content-Type: application/json")
     @POST("/api/co2sensor")
     fun getSensorData(@Body command: Command): Call<ResponseBody>
+
+    @Headers("Content-Type: application/json")
+    @POST("/api/co2sensor")  // Assuming this is the same endpoint for LED control
+    fun controlLed(@Body command: Command): Call<ResponseBody>
 }

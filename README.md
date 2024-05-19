@@ -3,7 +3,7 @@ Client-Server app for monitoring CO2 in living room
 ## Dependencies
 
 ```
-sudo apt install libgpiod-dev nlohmann-json3-dev libspdlog-dev libboost-system-dev libboost-filesystem-dev libsqlite3-dev
+sudo apt install avahi-daemon libgpiod-dev nlohmann-json3-dev libspdlog-dev libboost-system-dev libboost-filesystem-dev libsqlite3-dev
 ```
 
 ## Build steps
