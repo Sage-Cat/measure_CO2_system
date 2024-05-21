@@ -11,9 +11,15 @@ import org.json.JSONArray
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 
 object ApiClient {
     private const val BASE_URL = "http://co2measure.local:12345/"
+    private val executorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
+    private var scheduledFuture: ScheduledFuture<*>? = null
 
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
@@ -25,6 +31,18 @@ object ApiClient {
 
     private val apiService: ApiService by lazy {
         retrofit.create(ApiService::class.java)
+    }
+
+    fun startPolling(command: String, param1: String, interval: Long, callback: SensorDataCallback) {
+        stopPolling()  // Зупиняємо будь-яке існуюче опитування
+        scheduledFuture = executorService.scheduleWithFixedDelay({
+            getSensorData(command, param1, callback)
+        }, 0, interval, TimeUnit.SECONDS)
+    }
+
+    fun stopPolling() {
+        scheduledFuture?.cancel(true)
+        scheduledFuture = null
     }
 
     fun getSensorData(command: String, param1: String, callback: SensorDataCallback) {
@@ -45,7 +63,7 @@ object ApiClient {
                                 val sample = CO2Sample(datetime, co2Level)
                                 samples.add(sample)
                             }
-                            if (command != "get_outdoor"){
+                            if (command != "get_outdoor") {
                                 val analyzer = SensorDataAnalyzer()
                                 analyzer.onDataReceived(samples)
                             }
