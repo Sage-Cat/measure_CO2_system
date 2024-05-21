@@ -1,6 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.SettingsFragment"/>
+    tools:context=".fragments.SettingsFragment">
+
+    <me.tankery.lib.circularseekbar.CircularSeekBar
+        android:id="@+id/circularSeekBar"
+        android:layout_width="240dp"
+        android:layout_height="240dp"
+        android:layout_centerInParent="true"
+        app:cs_circle_style = "round"
+        app:cs_progress = "1500"
+        app:cs_max = "2000"
+        app:cs_negative_enabled = "false"
+        app:cs_move_outside_circle = "true"
+        app:cs_maintain_equal_circle = "true"
+        app:cs_use_custom_radii = "false"
+        app:cs_lock_enabled = "true"
+        app:cs_circle_x_radius = "0dp"
+        app:cs_circle_y_radius = "0dp"
+        app:cs_circle_stroke_width = "10dp"
+        app:cs_disable_pointer = "false"
+        app:cs_pointer_stroke_width = "20dp"
+        app:cs_circle_fill = "@color/white"
+        app:cs_circle_color = "@color/myWhite"
+        app:cs_circle_progress_color = "@color/myRed"
+        app:cs_pointer_color = "@color/myRed"
+        app:cs_pointer_alpha_ontouch = "5"
+        app:cs_pointer_angle = "0"
+        app:cs_disable_progress_glow = "true"
+        app:cs_hide_progress_when_empty = "true"/>
+
+    <TextView
+        android:id="@+id/progressTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="0000"
+        android:textColor="@color/myRed"
+        android:textSize="26sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="119dp"
+        android:layout_below="@+id/circularSeekBar"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="83dp"
+        android:layout_marginTop="33dp"
+        android:layout_marginEnd="83dp"
+        android:layout_marginBottom="185dp"
+        android:text=" Threshold maximum value of CO2"
+        android:textAlignment="center"
+        android:textColor="@color/myRed"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+</RelativeLayout>

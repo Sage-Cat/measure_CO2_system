@@ -5,85 +5,62 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#CBCDFB"
+    android:background="#F8F8F8"
     android:textAlignment="center"
     tools:context=".fragments.MainFragment">
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="261dp"
-        android:layout_height="47dp"
+        android:layout_width="321dp"
+        android:layout_height="67dp"
         android:fontFamily="@font/montserrat_light"
         android:text="MEASURING LIST"
         android:textAlignment="center"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
+        android:textColor="#cd2355"
+        android:textSize="34sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.1" />
+        app:layout_constraintVertical_bias="0.088" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recView"
-        android:layout_width="365dp"
-        android:layout_height="355dp"
+        android:layout_width="371dp"
+        android:layout_height="478dp"
         android:background="@drawable/rectangle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.466"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.37" />
+        app:layout_constraintVertical_bias="0.461" />
 
     <Button
         android:id="@+id/btnMeasureFromDate"
         android:layout_width="165dp"
         android:layout_height="64dp"
+        android:backgroundTint="@color/myRed"
         android:fontFamily="@font/montserrat_light"
         android:text="Get measuring from date"
+        android:textColor="@color/myWhite"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.934"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.935"
-        app:rippleColor="#76319F" />
-
-    <TextView
-        android:id="@+id/tvSelectedDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Date"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.486"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.74" />
-
-    <Button
-        android:id="@+id/btnSelectDate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/montserrat_light"
-        android:text="Choose date"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.806" />
+        app:rippleColor="@color/myPink" />
 
     <Button
         android:id="@+id/btnAllMeasure"
         android:layout_width="165dp"
         android:layout_height="64dp"
+        android:backgroundTint="@color/myRed"
         android:fontFamily="@font/montserrat_light"
         android:text="Get all measuring"
+        android:textColor="@color/myWhite"
+        app:iconTint="@color/myRed"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/btnMeasureFromDate"
@@ -91,6 +68,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.935"
-        app:rippleColor="#76319F" />
+        app:rippleColor="@color/myPink" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
