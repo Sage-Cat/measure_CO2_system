@@ -1,8 +1,10 @@
 #include "SQLiteDatabase.hpp"
-#include "SpdlogConfig.hpp"
+
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+
+#include "SpdlogConfig.hpp"
 
 SQLiteDatabase::SQLiteDatabase(const std::string &dbPath)
     : db(nullptr, &sqlite3_close), dbPath(dbPath)
@@ -14,8 +16,10 @@ SQLiteDatabase::SQLiteDatabase(const std::string &dbPath)
 
     sqlite3 *tempDb = nullptr;
     if (sqlite3_open(dbPath.c_str(), &tempDb) != SQLITE_OK) {
-        SPDLOG_ERROR("Error opening database: {}", sqlite3_errmsg(tempDb));
-        throw std::runtime_error("Error opening database");
+        std::string errorMsg = "Error opening database: ";
+        errorMsg += sqlite3_errmsg(tempDb);
+        sqlite3_close(tempDb);
+        throw std::runtime_error(errorMsg);
     }
     db.reset(tempDb);
 
@@ -43,9 +47,10 @@ bool SQLiteDatabase::initDatabaseSchema()
 
     char *errMsg = nullptr;
     if (sqlite3_exec(db.get(), sql, nullptr, nullptr, &errMsg) != SQLITE_OK) {
-        SPDLOG_ERROR("Error creating tables: {}", errMsg);
+        std::string errorMsg = "Error creating tables: ";
+        errorMsg += errMsg;
         sqlite3_free(errMsg);
-        return false;
+        throw std::runtime_error(errorMsg);
     }
     SPDLOG_INFO("Tables 'IndoorCO2' and 'OutdoorCO2' created.");
     return true;
@@ -57,8 +62,8 @@ bool SQLiteDatabase::addIndoorCO2Sample(const CO2Sample &sample)
     const std::string sql = "INSERT INTO IndoorCO2 (datetime, CO2Level) VALUES (?, ?);";
     sqlite3_stmt *stmt    = nullptr;
     if (sqlite3_prepare_v2(db.get(), sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        SPDLOG_ERROR("Error preparing insert statement: {}", sqlite3_errmsg(db.get()));
-        return false;
+        throw std::runtime_error("Error preparing insert statement: " +
+                                 std::string(sqlite3_errmsg(db.get())));
     }
     std::unique_ptr<sqlite3_stmt, StatementDeleter> stmtUnique(stmt);
 
@@ -66,8 +71,7 @@ bool SQLiteDatabase::addIndoorCO2Sample(const CO2Sample &sample)
     sqlite3_bind_text(stmt, 2, sample.CO2Level.c_str(), -1, SQLITE_TRANSIENT);
 
     if (sqlite3_step(stmt) != SQLITE_DONE) {
-        SPDLOG_ERROR("Error inserting data: {}", sqlite3_errmsg(db.get()));
-        return false;
+        throw std::runtime_error("Error inserting data: " + std::string(sqlite3_errmsg(db.get())));
     }
 
     SPDLOG_INFO("Indoor CO2 sample added: {} - CO2Level {}", sample.datetime, sample.CO2Level);
@@ -80,8 +84,8 @@ bool SQLiteDatabase::addOutdoorCO2Sample(const CO2Sample &sample)
     const std::string sql = "INSERT INTO OutdoorCO2 (datetime, CO2Level) VALUES (?, ?);";
     sqlite3_stmt *stmt    = nullptr;
     if (sqlite3_prepare_v2(db.get(), sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        SPDLOG_ERROR("Error preparing insert statement: {}", sqlite3_errmsg(db.get()));
-        return false;
+        throw std::runtime_error("Error preparing insert statement: " +
+                                 std::string(sqlite3_errmsg(db.get())));
     }
     std::unique_ptr<sqlite3_stmt, StatementDeleter> stmtUnique(stmt);
 
@@ -89,8 +93,7 @@ bool SQLiteDatabase::addOutdoorCO2Sample(const CO2Sample &sample)
     sqlite3_bind_text(stmt, 2, sample.CO2Level.c_str(), -1, SQLITE_TRANSIENT);
 
     if (sqlite3_step(stmt) != SQLITE_DONE) {
-        SPDLOG_ERROR("Error inserting data: {}", sqlite3_errmsg(db.get()));
-        return false;
+        throw std::runtime_error("Error inserting data: " + std::string(sqlite3_errmsg(db.get())));
     }
 
     SPDLOG_INFO("Outdoor CO2 sample added: {} - CO2Level {}", sample.datetime, sample.CO2Level);
@@ -103,8 +106,8 @@ std::vector<CO2Sample> SQLiteDatabase::getIndoorCO2Samples()
     const std::string sql = "SELECT datetime, CO2Level FROM IndoorCO2;";
     sqlite3_stmt *stmt    = nullptr;
     if (sqlite3_prepare_v2(db.get(), sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        SPDLOG_ERROR("Error preparing select statement: {}", sqlite3_errmsg(db.get()));
-        return {};
+        throw std::runtime_error("Error preparing select statement: " +
+                                 std::string(sqlite3_errmsg(db.get())));
     }
     std::unique_ptr<sqlite3_stmt, StatementDeleter> stmtUnique(stmt);
 
@@ -124,8 +127,8 @@ std::vector<CO2Sample> SQLiteDatabase::getOutdoorCO2Samples()
     const std::string sql = "SELECT datetime, CO2Level FROM OutdoorCO2;";
     sqlite3_stmt *stmt    = nullptr;
     if (sqlite3_prepare_v2(db.get(), sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        SPDLOG_ERROR("Error preparing select statement: {}", sqlite3_errmsg(db.get()));
-        return {};
+        throw std::runtime_error("Error preparing select statement: " +
+                                 std::string(sqlite3_errmsg(db.get())));
     }
     std::unique_ptr<sqlite3_stmt, StatementDeleter> stmtUnique(stmt);
 
@@ -146,8 +149,8 @@ SQLiteDatabase::getIndoorCO2SamplesAfterDatetime(const std::string &dateAfter)
     const std::string sql = "SELECT datetime, CO2Level FROM IndoorCO2 WHERE datetime > ?;";
     sqlite3_stmt *stmt    = nullptr;
     if (sqlite3_prepare_v2(db.get(), sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        SPDLOG_ERROR("Error preparing select statement: {}", sqlite3_errmsg(db.get()));
-        return {};
+        throw std::runtime_error("Error preparing select statement: " +
+                                 std::string(sqlite3_errmsg(db.get())));
     }
     std::unique_ptr<sqlite3_stmt, StatementDeleter> stmtUnique(stmt);
 
