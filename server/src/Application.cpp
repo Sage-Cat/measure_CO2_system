@@ -32,20 +32,29 @@ void Application::doTask(RequestData data, SendResponseCallback callback)
     SPDLOG_TRACE("Application::doTask | cmd - {}", data.cmd);
     ResponseData resData{};
 
-    if (data.cmd == "get_indoor") {
-        resData.measurements = db_.getIndoorCO2Samples();
-    } else if (data.cmd == "get_indoor_after") {
-        resData.measurements = db_.getIndoorCO2SamplesAfterDatetime(data.param1);
-    } else if (data.cmd == "get_outdoor") {
-        resData.measurements = db_.getOutdoorCO2Samples();
-    } else if (data.cmd == "warning_on") {
-        led_.on();
-    } else if (data.cmd == "warning_off") {
-        led_.off();
-    } else {
-        SPDLOG_WARN("Application::doTask | unknown cmd");
+    try {
+        if (data.cmd == "get_indoor") {
+            resData.measurements = db_.getIndoorCO2Samples();
+        } else if (data.cmd == "get_indoor_after") {
+            if (data.params.size() < 1) {
+                throw std::invalid_argument("Missing parameter for 'get_indoor_after'");
+            }
+            resData.measurements = db_.getIndoorCO2SamplesAfterDatetime(data.params.at(0));
+        } else if (data.cmd == "get_outdoor") {
+            resData.measurements = db_.getOutdoorCO2Samples();
+        } else if (data.cmd == "warning_on") {
+            led_.on();
+        } else if (data.cmd == "warning_off") {
+            led_.off();
+        } else {
+            SPDLOG_WARN("Application::doTask | unknown cmd: {}", data.cmd);
+        }
+    } catch (const std::exception &e) {
+        SPDLOG_ERROR("Application::doTask | Error processing cmd: {} | Exception: {}", data.cmd,
+                     e.what());
+        // TODO: implement appropriate error handling for the whole system
     }
-
+    
     callback(resData);
 }
 

@@ -43,8 +43,13 @@ void Session::doRead()
                 auto json = nlohmann::json::parse(req->body());
                 SPDLOG_TRACE("Session::doRead | Got data from client: {}", json.dump());
 
-                RequestData requestData{.cmd    = json.at("cmd").get<std::string>(),
-                                        .param1 = json.at("param1").get<std::string>()};
+                RequestData requestData;
+                requestData.cmd = json.at("cmd").get<std::string>();
+                if (json.contains("params")) {
+                    requestData.params = json.at("params").get<std::vector<std::string>>();
+                } else {
+                    requestData.params = std::vector<std::string>{};
+                }
 
                 doTaskCallback_(requestData, [this, self](ResponseData data) {
                     SPDLOG_TRACE("SendResponseCallback");
