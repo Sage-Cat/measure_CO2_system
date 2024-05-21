@@ -8,6 +8,7 @@ import com.myproj.client.databinding.SampleItemBinding
 
 class SampleAdapter : RecyclerView.Adapter<SampleAdapter.SampleHolder>() {
     private val sampleList = ArrayList<CO2Sample>()
+
     class SampleHolder(item: View): RecyclerView.ViewHolder(item) {
         val binding = SampleItemBinding.bind(item)
         fun bind(cO2Sample: CO2Sample){
@@ -31,12 +32,17 @@ class SampleAdapter : RecyclerView.Adapter<SampleAdapter.SampleHolder>() {
 
     fun clear(){
         sampleList.clear()
-    }
-
-    fun addSample(sample: CO2Sample){
-
-        sampleList.add(sample)
         notifyDataSetChanged()
     }
 
+    fun addSample(sample: CO2Sample){
+        sampleList.add(sample)
+        notifyItemInserted(sampleList.size - 1)
+    }
+
+    fun updateSamples(samples: List<CO2Sample>) {
+        this.sampleList.clear()
+        this.sampleList.addAll(samples) // Додати всі нові зразки
+        notifyDataSetChanged()
+    }
 }
