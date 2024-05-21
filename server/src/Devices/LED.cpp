@@ -1,4 +1,5 @@
 #include "LED.hpp"
+
 #include "SpdlogConfig.hpp"
 
 LED::LED(int pin) : pin_(pin)
@@ -7,15 +8,13 @@ LED::LED(int pin) : pin_(pin)
 
     chip_ = gpiod_chip_open_by_number(0);
     if (!chip_) {
-        SPDLOG_ERROR("Failed to open GPIO chip");
-        return;
+        throw std::runtime_error("Failed to open GPIO chip");
     }
 
     line_ = gpiod_chip_get_line(chip_, pin_);
     if (!line_) {
-        SPDLOG_ERROR("Failed to get GPIO line");
         gpiod_chip_close(chip_);
-        return;
+        throw std::runtime_error("Failed to get GPIO line");
     }
 
     setup_pin();
@@ -45,7 +44,6 @@ void LED::setup_pin()
     SPDLOG_TRACE("LED::setup_pin");
     int ret = gpiod_line_request_output(line_, "LED", 0);
     if (ret < 0) {
-        SPDLOG_ERROR("Failed to request line as output");
-        return;
+        throw std::runtime_error("Failed to request line as output");
     }
 }

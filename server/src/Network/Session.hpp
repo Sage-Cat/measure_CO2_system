@@ -5,13 +5,15 @@
 #include <boost/beast.hpp>
 #include <functional>
 #include <memory>
+#include <nlohmann/json.hpp>
+#include <string>
 #include <vector>
 
 #include "Data.hpp"
 
 class Session : public std::enable_shared_from_this<Session> {
 public:
-    Session(boost::asio::ip::tcp::socket &&socket, DoTaskCallback doTaskCallback,
+    Session(boost::asio::ip::tcp::socket socket, DoTaskCallback doTaskCallback,
             unsigned int sessionId);
 
     void start();
@@ -21,6 +23,8 @@ private:
     void doRead();
     void doWrite(const std::string &response);
     void doClose();
+    RequestData deserializeRequest(const std::string &requestBody);
+    std::string serializeResponse(const ResponseData &responseData);
 
 private:
     boost::asio::ip::tcp::socket socket_;

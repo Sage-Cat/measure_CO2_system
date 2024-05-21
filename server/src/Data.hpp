@@ -17,15 +17,22 @@ struct RequestData {
 
 struct ResponseData {
     std::vector<CO2Sample> measurements{};
+    std::string error{};
 };
 
-// callback for Application layer to send data back to client
+// Callback for Application layer to send data back to client
 using SendResponseCallback = std::function<void(ResponseData)>;
 
-// callback for Network layer to process data from client
+// Callback for Network layer to process data from client
 using DoTaskCallback = std::function<void(RequestData, SendResponseCallback)>;
 
-// callback for fetching outdoor CO2 from OpenWeatherMap
+// Callback for fetching outdoor CO2 from OpenWeatherMap
 using FetchOutdoorCO2TaskCallback = std::function<std::string(const std::string &)>;
 
-#endif
+namespace JsonKeys {
+inline constexpr auto CMD          = "cmd";
+inline constexpr auto PARAMS       = "params";
+inline constexpr auto ERR        = "error";
+} // namespace JsonKeys
+
+#endif // DATA_HPP

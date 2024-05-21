@@ -49,12 +49,16 @@ void Application::doTask(RequestData data, SendResponseCallback callback)
         } else {
             SPDLOG_WARN("Application::doTask | unknown cmd: {}", data.cmd);
         }
+    } catch (const std::runtime_error &e) {
+        SPDLOG_ERROR("Application::doTask | Error processing cmd: {} | RuntimeException: {}",
+                     data.cmd, e.what());
+        resData.error = std::string("Runtime error: ") + e.what();
     } catch (const std::exception &e) {
         SPDLOG_ERROR("Application::doTask | Error processing cmd: {} | Exception: {}", data.cmd,
                      e.what());
-        // TODO: implement appropriate error handling for the whole system
+        resData.error = std::string("Error: ") + e.what();
     }
-    
+
     callback(resData);
 }
 

@@ -113,26 +113,38 @@ int main(int argc, char **argv)
     }
 
     // Main logic
-    SQLiteDatabase db(DATABASE_FILE_PATH);
-    CO2Sensor sensor(sensorPath);
-    LED led(ledPin);
+    try {
+        SQLiteDatabase db(DATABASE_FILE_PATH);
+        CO2Sensor sensor(sensorPath);
+        LED led(ledPin);
 
-    Application application(sensor, led, db, std::chrono::seconds(measuringInterval));
+        Application application(sensor, led, db, std::chrono::seconds(measuringInterval));
 
-    io_context ioContext;
-    ip::tcp::endpoint endpoint(ip::tcp::v4(), port);
-    Server server(ioContext, endpoint, openWeatherApiKey,
-                  [&application](RequestData data, SendResponseCallback callback) {
-                      SPDLOG_TRACE("DoTaskCallback");
-                      application.doTask(data, callback);
-                  });
+        io_context ioContext;
+        ip::tcp::endpoint endpoint(ip::tcp::v4(), port);
+        Server server(ioContext, endpoint, openWeatherApiKey,
+                      [&application](RequestData data, SendResponseCallback callback) {
+                          SPDLOG_TRACE("DoTaskCallback");
+                          application.doTask(data, callback);
+                      });
 
-    application.setFetchOutdoorCO2Callback([&server](const std::string &location) {
-        SPDLOG_TRACE("FetchOutdoorCO2Callback");
-        return server.fetchOutdoorCO2Level(location);
-    });
-    application.startTasks();
+        application.setFetchOutdoorCO2Callback([&server](const std::string &location) {
+            SPDLOG_TRACE("FetchOutdoorCO2Callback");
+            return server.fetchOutdoorCO2Level(location);
+        });
+        application.startTasks();
 
-    ioContext.run();
+        ioContext.run();
+    } catch (const std::runtime_error &e) {
+        SPDLOG_CRITICAL("Runtime error: {}", e.what());
+        return EXIT_FAILURE;
+    } catch (const std::exception &e) {
+        SPDLOG_CRITICAL("Exception: {}", e.what());
+        return EXIT_FAILURE;
+    } catch (...) {
+        SPDLOG_CRITICAL("Unknown error occurred.");
+        return EXIT_FAILURE;
+    }
+
     return 0;
 }

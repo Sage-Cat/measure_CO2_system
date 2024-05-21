@@ -1,18 +1,17 @@
 #include "Session.hpp"
-
+#include "Data.hpp"
+#include "JsonSerialization.hpp"
+#include "SpdlogConfig.hpp"
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <nlohmann/json.hpp>
-
-#include "JsonSerialization.hpp"
-#include "SpdlogConfig.hpp"
 
 namespace beast = boost::beast;
 namespace http  = beast::http;
 using tcp       = boost::asio::ip::tcp;
 
-Session::Session(tcp::socket &&socket, DoTaskCallback doTaskCallback, unsigned int sessionId)
-    : socket_(std::move(socket)), doTaskCallback_(doTaskCallback), sessionId_(sessionId)
+Session::Session(tcp::socket socket, DoTaskCallback doTaskCallback, unsigned int sessionId)
+    : socket_(std::move(socket)), doTaskCallback_(std::move(doTaskCallback)), sessionId_(sessionId)
 {
     SPDLOG_INFO("Session {} created", sessionId_);
 }
@@ -26,7 +25,6 @@ void Session::doRead()
     SPDLOG_TRACE("Session::doRead");
     auto self = shared_from_this();
 
-    // Read an HTTP request
     auto req = std::make_shared<http::request<http::string_body>>();
     http::async_read(
         socket_, buffer_, *req,
@@ -40,43 +38,20 @@ void Session::doRead()
             }
 
             try {
-                auto json = nlohmann::json::parse(req->body());
-                SPDLOG_TRACE("Session::doRead | Got data from client: {}", json.dump());
-
-                RequestData requestData;
-                requestData.cmd = json.at("cmd").get<std::string>();
-                if (json.contains("params")) {
-                    requestData.params = json.at("params").get<std::vector<std::string>>();
-                } else {
-                    requestData.params = std::vector<std::string>{};
-                }
+                RequestData requestData = deserializeRequest(req->body());
 
                 doTaskCallback_(requestData, [this, self](ResponseData data) {
                     SPDLOG_TRACE("SendResponseCallback");
-                    nlohmann::json responseJson = nlohmann::json::array();
-                    for (const auto &sample : data.measurements) {
-                        nlohmann::json j;
-                        nlohmann::adl_serializer<CO2Sample>::to_json(j, sample);
-                        responseJson.push_back(j);
-                    }
-                    doWrite(responseJson.dump());
+                    std::string response = serializeResponse(data);
+                    doWrite(response);
                 });
 
-            } catch (const nlohmann::json::parse_error &parseErr) {
-                SPDLOG_ERROR("Session {}: JSON parsing error: {}", sessionId_, parseErr.what());
-                nlohmann::json errorJson = {
-                    {"error", "Invalid JSON format: " + std::string(parseErr.what())}};
-                doWrite(errorJson.dump());
-            } catch (const nlohmann::json::out_of_range &oor) {
-                SPDLOG_ERROR("Session {}: Missing required JSON keys: {}", sessionId_, oor.what());
-                nlohmann::json errorJson = {
-                    {"error", "Missing required data: " + std::string(oor.what())}};
-                doWrite(errorJson.dump());
             } catch (const std::exception &e) {
                 SPDLOG_ERROR("Session {}: Error processing data: {}", sessionId_, e.what());
-                nlohmann::json errorJson = {
-                    {"error", "Data processing error: " + std::string(e.what())}};
-                doWrite(errorJson.dump());
+                ResponseData errorData;
+                errorData.error           = "Data processing error: " + std::string(e.what());
+                std::string errorResponse = serializeResponse(errorData);
+                doWrite(errorResponse);
             }
         });
 }
@@ -110,4 +85,34 @@ void Session::doClose()
     if (ec && ec != beast::errc::not_connected) {
         SPDLOG_ERROR("Session {}: Shutdown error: {}", sessionId_, ec.message());
     }
+}
+
+RequestData Session::deserializeRequest(const std::string &requestBody)
+{
+    auto json = nlohmann::json::parse(requestBody);
+    SPDLOG_TRACE("Session::deserializeRequest | Got data from client: {}", json.dump());
+
+    RequestData requestData;
+    requestData.cmd = json.at(JsonKeys::CMD).get<std::string>();
+    if (json.contains(JsonKeys::PARAMS)) {
+        requestData.params = json.at(JsonKeys::PARAMS).get<std::vector<std::string>>();
+    }
+    return requestData;
+}
+
+std::string Session::serializeResponse(const ResponseData &responseData)
+{
+    nlohmann::json responseJson;
+
+    if (!responseData.error.empty()) {
+        responseJson[JsonKeys::ERR] = responseData.error;
+    } else {
+        responseJson = nlohmann::json::array();
+        for (const auto &sample : responseData.measurements) {
+            nlohmann::json j;
+            nlohmann::adl_serializer<CO2Sample>::to_json(j, sample);
+            responseJson.push_back(j);
+        }
+    }
+    return responseJson.dump();
 }

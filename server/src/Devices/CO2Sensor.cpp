@@ -32,8 +32,7 @@ void CO2Sensor::configurePort()
         uart_port_.set_option(boost::asio::serial_port_base::stop_bits(
             boost::asio::serial_port_base::stop_bits::one));
     } catch (const std::exception &e) {
-        SPDLOG_ERROR("Error configuring serial port: {}", e.what());
-        throw;
+        throw std::runtime_error("Error configuring serial port: " + std::string(e.what()));
     }
 }
 
