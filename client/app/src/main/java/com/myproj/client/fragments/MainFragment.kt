@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.TextView
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,7 +23,6 @@ class MainFragment : Fragment() {
 
     private var selectedDate = ""
     private val samples = mutableListOf<CO2Sample>()
-    private lateinit var textView1: TextView
     val adapter = SampleAdapter()
 
     override fun onCreateView(
@@ -33,8 +31,6 @@ class MainFragment : Fragment() {
     ): View? {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_main, container, false)
-
-        textView1 = view.findViewById(R.id.tvSelectedDate)
 
         val recView = view.findViewById<RecyclerView>(R.id.recView)
         recView.layoutManager = LinearLayoutManager(requireContext())
@@ -46,16 +42,16 @@ class MainFragment : Fragment() {
             insets
         }
 
-        view.findViewById<Button>(R.id.btnSelectDate).setOnClickListener {
-            showDatePickerDialog()
-        }
-
         view.findViewById<Button>(R.id.btnAllMeasure).setOnClickListener {
             getSensorData("get_indoor", "")
         }
 
         view.findViewById<Button>(R.id.btnMeasureFromDate).setOnClickListener {
-            getSensorData("get_indoor_after", selectedDate)
+            showDatePickerDialog { selectedDate ->
+                if (selectedDate.isNotEmpty()) {
+                    getSensorData("get_indoor_after", selectedDate)
+                }
+            }
         }
 
         getSensorData("get_indoor", "")
@@ -64,7 +60,7 @@ class MainFragment : Fragment() {
     }
 
     @SuppressLint("DefaultLocale")
-    private fun showDatePickerDialog() {
+    private fun showDatePickerDialog(onDateSelected: (String) -> Unit) {
         val calendar = Calendar.getInstance()
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH)
@@ -74,13 +70,12 @@ class MainFragment : Fragment() {
             requireContext(), { _, selectedYear, selectedMonth, selectedDay ->
                 val formattedMonth = String.format("%02d", selectedMonth + 1)
                 val formattedDay = String.format("%02d", selectedDay)
-                selectedDate = "$selectedYear-$formattedMonth-$formattedDay"
-                textView1.text = selectedDate
+                val selectedDate = "$selectedYear-$formattedMonth-$formattedDay"
+                onDateSelected(selectedDate)
             }, year, month, day
         )
         datePickerDialog.show()
     }
-
 
     private fun getSensorData(command: String, param1: String) {
         ApiClient.getSensorData(command, param1, object : SensorDataCallback {
