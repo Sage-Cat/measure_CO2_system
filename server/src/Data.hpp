@@ -12,7 +12,7 @@ struct CO2Sample {
 
 struct RequestData {
     std::string cmd{};
-    std::string param1{};
+    std::vector<std::string> params{};
 };
 
 struct ResponseData {
