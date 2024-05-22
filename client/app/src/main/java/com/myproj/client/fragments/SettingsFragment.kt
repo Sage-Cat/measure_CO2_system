@@ -8,10 +8,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import com.myproj.client.R
+import com.myproj.client.network.ApiClient
+import com.myproj.client.network.DataRepository
 import me.tankery.lib.circularseekbar.CircularSeekBar
 
 class SettingsFragment : Fragment() {
+
+    private val dataRepository: DataRepository by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,6 +33,7 @@ class SettingsFragment : Fragment() {
         val lastProgress = sharedPrefs.getFloat("LastProgress", 0f)
 
         circularSeekBar.progress = lastProgress
+        onSeekBarChange(circularSeekBar.progress.toInt())
         progressTextView.text = Math.round(lastProgress).toString()
 
         circularSeekBar.setOnSeekBarChangeListener(object : CircularSeekBar.OnCircularSeekBarChangeListener {
@@ -41,10 +48,24 @@ class SettingsFragment : Fragment() {
             }
 
             override fun onStartTrackingTouch(circularSeekBar: CircularSeekBar?) {}
-            override fun onStopTrackingTouch(circularSeekBar: CircularSeekBar?) {}
+            override fun onStopTrackingTouch(circularSeekBar: CircularSeekBar?) {
+                if (circularSeekBar != null) {
+                    onSeekBarChange(circularSeekBar.progress.toInt())
+                }
+            }
         })
 
         return view
+    }
+
+    private fun onSeekBarChange(newValue: Int) {
+        dataRepository.sensorData.observe(viewLifecycleOwner, Observer { sensorData ->
+            var command = "warning_off"
+            if (sensorData.isNotEmpty() && sensorData.last().co2Level.toInt() >= newValue) {
+               command = "warning_on"
+            }
+            ApiClient.controlLed(command)
+        })
     }
 
     companion object {

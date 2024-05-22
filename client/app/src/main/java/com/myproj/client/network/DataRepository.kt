@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.myproj.client.CO2Sample
 
-class SensorDataViewModel : ViewModel() {
+class DataRepository : ViewModel() {
 
     private val _sensorData = MutableLiveData<List<CO2Sample>>()
     val sensorData: LiveData<List<CO2Sample>> get() = _sensorData
