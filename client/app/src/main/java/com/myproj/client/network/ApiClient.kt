@@ -2,7 +2,6 @@ package com.myproj.client.network
 
 import android.util.Log
 import com.myproj.client.CO2Sample
-import com.myproj.client.SensorDataAnalyzer
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -62,10 +61,6 @@ object ApiClient {
                                 val co2Level = jsonObject.getString("CO2Level")
                                 val sample = CO2Sample(datetime, co2Level)
                                 samples.add(sample)
-                            }
-                            if (command != "get_outdoor") {
-                                val analyzer = SensorDataAnalyzer()
-                                analyzer.onDataReceived(samples)
                             }
                             callback.onSuccess(samples)
                         } else {
