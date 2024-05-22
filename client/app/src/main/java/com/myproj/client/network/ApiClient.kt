@@ -34,7 +34,7 @@ object ApiClient {
     }
 
     fun startPolling(command: String, param1: String, interval: Long, callback: SensorDataCallback) {
-        stopPolling()  // Зупиняємо будь-яке існуюче опитування
+        stopPolling()
         scheduledFuture = executorService.scheduleWithFixedDelay({
             getSensorData(command, param1, callback)
         }, 0, interval, TimeUnit.SECONDS)
