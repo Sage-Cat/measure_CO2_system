@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <sstream>
 #include <thread>
+#include <xgboost/c_api.h>
 
 #include "Data.hpp"
 
@@ -28,6 +29,7 @@ private:
     void sensorTask();
     void outdoorTask();
     std::string getCurrentDateTime();
+    std::vector<CO2Sample> makeForecast(std::vector<CO2Sample> measurements);
 
 private:
     CO2Sensor &sensor_;

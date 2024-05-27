@@ -46,6 +46,8 @@ void Application::doTask(RequestData data, SendResponseCallback callback)
             led_.on();
         } else if (data.cmd == "warning_off") {
             led_.off();
+        } else if (data.cmd == "get_forecast") {
+            resData.measurements = makeForecast(db_.getIndoorCO2Samples());
         } else {
             SPDLOG_WARN("Application::doTask | unknown cmd: {}", data.cmd);
         }
@@ -111,4 +113,58 @@ void Application::outdoorTask()
     } catch (const std::exception &e) {
         SPDLOG_ERROR("Exception in outdoorTask: {}", e.what());
     }
+}
+
+std::vector<CO2Sample> Application::makeForecast(std::vector<CO2Sample> measurements) {
+    SPDLOG_TRACE("Application::makeForecast");
+
+    BoosterHandle booster;
+    XGBoosterCreate(nullptr, 0, &booster);
+    XGBoosterLoadModel(booster, XGMODEL_FILE_PATH);
+
+    std::vector<float> features;
+    for (const auto& sample : measurements) {
+        tm datetime = {};
+        std::istringstream ss(sample.datetime);
+        ss >> std::get_time(&datetime, "%Y-%m-%d %H:%M:%S");
+
+        features.push_back(static_cast<float>(datetime.tm_hour));
+        features.push_back(static_cast<float>(datetime.tm_mday));
+        features.push_back(static_cast<float>(datetime.tm_mon + 1));
+        features.push_back(static_cast<float>(datetime.tm_wday));
+    }
+
+    int num_features = 4;
+    int num_samples = measurements.size();
+    std::vector<float> X_flat(features.begin(), features.end());
+
+    DMatrixHandle h_input;
+    XGDMatrixCreateFromMat(X_flat.data(), num_samples, num_features, -1, &h_input);
+
+    bst_ulong out_len;
+    const float* y_pred;
+    XGBoosterPredict(booster, h_input, 0, 0, 0, &out_len, &y_pred);
+
+    std::vector<CO2Sample> forecasted_samples;
+    for (int i = 0; i < 24; ++i) {
+        CO2Sample sample;
+        
+        tm future_time = {};
+        std::istringstream ss(measurements.back().datetime);
+        ss >> std::get_time(&future_time, "%Y-%m-%d %H:%M:%S");
+        future_time.tm_hour += i + 1;
+        mktime(&future_time);
+        
+        std::ostringstream datetime_ss;
+        datetime_ss << std::put_time(&future_time, "%Y-%m-%d %H:%M:%S");
+        sample.datetime = datetime_ss.str();
+        
+        sample.CO2Level = std::to_string(y_pred[i]);
+        forecasted_samples.push_back(sample);
+    }
+
+    XGDMatrixFree(h_input);
+    XGBoosterFree(booster);
+
+    return forecasted_samples;
 }
