@@ -36,6 +36,9 @@ private:
     LED &led_;
     SQLiteDatabase &db_;
 
+    BoosterHandle booster_;
+    DMatrixHandle h_input_;
+
     std::thread sensorThread_;
     std::thread outdoorThread_;
     std::atomic<bool> stopThreads_;
