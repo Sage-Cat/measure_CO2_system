@@ -60,6 +60,7 @@ class ChartFragment : Fragment() {
                 sampleList.addAll(samples)
                 requestsCompleted++
                 if (requestsCompleted == 3) {
+                    samplesForecast.add(0, samplesIndoor.last())
                     drawCharts()
                 }
             }
