@@ -60,7 +60,7 @@ class ChartFragment : Fragment() {
                 sampleList.addAll(samples)
                 requestsCompleted++
                 if (requestsCompleted == 3) {
-                    samplesForecast.add(0, samplesIndoor.last())
+                    samplesIndoor.lastOrNull()?.let { samplesForecast.add(0, it) }
                     drawCharts()
                 }
             }
@@ -79,7 +79,7 @@ class ChartFragment : Fragment() {
             samplesOutdoor,
             "CO2 Measuring",
             "Indoor CO2 Levels",
-            "Outdoor CO2 Levels",
+            "Outdoor CO (µg/m³)",
             Color.RED,
             Color.BLUE
         )

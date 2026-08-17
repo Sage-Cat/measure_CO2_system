@@ -4,6 +4,7 @@
 #include "Data.hpp"
 #include <boost/noncopyable.hpp>
 #include <memory>
+#include <mutex>
 #include <sqlite3.h>
 #include <vector>
 
@@ -27,6 +28,7 @@ private:
 private:
     std::unique_ptr<sqlite3, decltype(&sqlite3_close)> db;
     std::string dbPath;
+    std::mutex mutex_;
 };
 
 #endif // SQLITE_DATABASE_HPP

@@ -47,7 +47,7 @@ int CO2Sensor::readCO2()
     boost::asio::read(uart_port_, boost::asio::buffer(response));
 
     // Response validation
-    if (response[0] != 0xFF || response[1] != 0x86) {
+    if (!isValidReadResponse(response)) {
         throw std::runtime_error("Invalid response from sensor.");
     }
 
@@ -112,7 +112,17 @@ void CO2Sensor::sendCommand()
     boost::asio::write(uart_port_, boost::asio::buffer(command_));
 }
 
-char CO2Sensor::calculateChecksum() const
+bool CO2Sensor::isValidReadResponse(const std::array<unsigned char, 9> &response)
+{
+    unsigned char sum = 0;
+    for (std::size_t i = 1; i < response.size() - 1; ++i) {
+        sum += response[i];
+    }
+    const auto checksum = static_cast<unsigned char>(0xFF - sum + 1);
+    return response[0] == 0xFF && response[1] == 0x86 && response[8] == checksum;
+}
+
+unsigned char CO2Sensor::calculateChecksum() const
 {
     SPDLOG_TRACE("CO2Sensor::calculateChecksum");
     unsigned char checksum = 0;

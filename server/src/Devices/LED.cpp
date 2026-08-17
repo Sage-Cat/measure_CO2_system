@@ -17,7 +17,12 @@ LED::LED(int pin) : pin_(pin)
         throw std::runtime_error("Failed to get GPIO line");
     }
 
-    setup_pin();
+    try {
+        setup_pin();
+    } catch (...) {
+        gpiod_chip_close(chip_);
+        throw;
+    }
 }
 
 LED::~LED()
@@ -30,13 +35,17 @@ LED::~LED()
 void LED::on()
 {
     SPDLOG_INFO("LED is ON");
-    gpiod_line_set_value(line_, 1);
+    if (gpiod_line_set_value(line_, 1) < 0) {
+        throw std::runtime_error("Failed to set LED output high");
+    }
 }
 
 void LED::off()
 {
     SPDLOG_INFO("LED is OFF");
-    gpiod_line_set_value(line_, 0);
+    if (gpiod_line_set_value(line_, 0) < 0) {
+        throw std::runtime_error("Failed to set LED output low");
+    }
 }
 
 void LED::setup_pin()

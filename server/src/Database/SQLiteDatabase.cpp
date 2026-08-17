@@ -33,6 +33,7 @@ SQLiteDatabase::SQLiteDatabase(const std::string &dbPath)
 
 bool SQLiteDatabase::initDatabaseSchema()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     SPDLOG_TRACE("SQLiteDatabase::initDatabaseSchema");
     const char *sql = R"(
         CREATE TABLE IF NOT EXISTS IndoorCO2 (
@@ -58,6 +59,7 @@ bool SQLiteDatabase::initDatabaseSchema()
 
 bool SQLiteDatabase::addIndoorCO2Sample(const CO2Sample &sample)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     SPDLOG_TRACE("SQLiteDatabase::addIndoorCO2Sample");
     const std::string sql = "INSERT INTO IndoorCO2 (datetime, CO2Level) VALUES (?, ?);";
     sqlite3_stmt *stmt    = nullptr;
@@ -80,6 +82,7 @@ bool SQLiteDatabase::addIndoorCO2Sample(const CO2Sample &sample)
 
 bool SQLiteDatabase::addOutdoorCO2Sample(const CO2Sample &sample)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     SPDLOG_TRACE("SQLiteDatabase::addOutdoorCO2Sample");
     const std::string sql = "INSERT INTO OutdoorCO2 (datetime, CO2Level) VALUES (?, ?);";
     sqlite3_stmt *stmt    = nullptr;
@@ -102,8 +105,9 @@ bool SQLiteDatabase::addOutdoorCO2Sample(const CO2Sample &sample)
 
 std::vector<CO2Sample> SQLiteDatabase::getIndoorCO2Samples()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     SPDLOG_TRACE("SQLiteDatabase::getIndoorCO2Samples");
-    const std::string sql = "SELECT datetime, CO2Level FROM IndoorCO2;";
+    const std::string sql = "SELECT datetime, CO2Level FROM IndoorCO2 ORDER BY datetime ASC;";
     sqlite3_stmt *stmt    = nullptr;
     if (sqlite3_prepare_v2(db.get(), sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         throw std::runtime_error("Error preparing select statement: " +
@@ -123,8 +127,9 @@ std::vector<CO2Sample> SQLiteDatabase::getIndoorCO2Samples()
 
 std::vector<CO2Sample> SQLiteDatabase::getOutdoorCO2Samples()
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     SPDLOG_TRACE("SQLiteDatabase::getOutdoorCO2Samples");
-    const std::string sql = "SELECT datetime, CO2Level FROM OutdoorCO2;";
+    const std::string sql = "SELECT datetime, CO2Level FROM OutdoorCO2 ORDER BY datetime ASC;";
     sqlite3_stmt *stmt    = nullptr;
     if (sqlite3_prepare_v2(db.get(), sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         throw std::runtime_error("Error preparing select statement: " +
@@ -145,9 +150,11 @@ std::vector<CO2Sample> SQLiteDatabase::getOutdoorCO2Samples()
 std::vector<CO2Sample>
 SQLiteDatabase::getIndoorCO2SamplesAfterDatetime(const std::string &dateAfter)
 {
+    std::lock_guard<std::mutex> lock(mutex_);
     SPDLOG_TRACE("SQLiteDatabase::getIndoorCO2SamplesAfterDatetime | datetime - {}", dateAfter);
-    const std::string sql = "SELECT datetime, CO2Level FROM IndoorCO2 WHERE datetime > ?;";
-    sqlite3_stmt *stmt    = nullptr;
+    const std::string sql =
+        "SELECT datetime, CO2Level FROM IndoorCO2 WHERE datetime > ? ORDER BY datetime ASC;";
+    sqlite3_stmt *stmt = nullptr;
     if (sqlite3_prepare_v2(db.get(), sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
         throw std::runtime_error("Error preparing select statement: " +
                                  std::string(sqlite3_errmsg(db.get())));

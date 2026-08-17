@@ -6,7 +6,7 @@ import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.POST
 
-data class Command(val cmd: String, val param1: String)
+data class Command(val cmd: String, val params: List<String> = emptyList())
 
 interface ApiService {
     @Headers("Content-Type: application/json")

@@ -1,2 +1,5 @@
 server/build
+open_weather_api_key.txt
+*.sl3
+*.model
 .vscode/

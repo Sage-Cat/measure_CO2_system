@@ -26,13 +26,13 @@ using SendResponseCallback = std::function<void(ResponseData)>;
 // Callback for Network layer to process data from client
 using DoTaskCallback = std::function<void(RequestData, SendResponseCallback)>;
 
-// Callback for fetching outdoor CO2 from OpenWeatherMap
-using FetchOutdoorCO2TaskCallback = std::function<std::string(const std::string &)>;
+// Callback for fetching outdoor carbon monoxide from OpenWeatherMap.
+using FetchOutdoorCOTaskCallback = std::function<std::string(const std::string &)>;
 
 namespace JsonKeys {
-inline constexpr auto CMD          = "cmd";
-inline constexpr auto PARAMS       = "params";
-inline constexpr auto ERR        = "error";
+inline constexpr auto CMD    = "cmd";
+inline constexpr auto PARAMS = "params";
+inline constexpr auto ERR    = "error";
 } // namespace JsonKeys
 
 #endif // DATA_HPP

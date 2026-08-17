@@ -20,13 +20,15 @@ using namespace boost::asio;
 void printUsage(const char *progName)
 {
     std::cout << "Usage: " << progName
-              << " [-s sensorPath] [-i measuringInterval] [-k apiKeyFilePath] [-l ledPin]\n"
+              << " [-b bindAddress] [-s sensorPath] [-i measuringInterval] [-k apiKeyFilePath] [-l "
+                 "ledPin]\n"
               << "Options:\n"
-              << "  -s, --sensor       Sensor path (default: /dev/ttyAMA0)\n"
-              << "  -i, --interval     Measuring interval in seconds (default: 10)\n"
-              << "  -k, --apikey       Path to the OpenWeather API key file (default: "
+              << "  -b  Bind address (default: 127.0.0.1; use a LAN address explicitly)\n"
+              << "  -s  Sensor path (default: /dev/ttyAMA0)\n"
+              << "  -i  Measuring interval in seconds (default: 10)\n"
+              << "  -k  Path to the OpenWeather API key file (default: "
                  "./open_weather_api.txt)\n"
-              << "  -l, --led          GPIO pin for the LED (default: 18)\n";
+              << "  -l  GPIO pin for the LED (default: 18)\n";
 }
 
 std::string readApiKeyFromFile(const std::string &filePath)
@@ -50,9 +52,8 @@ int main(int argc, char **argv)
 {
     SpdlogConfig::init<SpdlogConfig::LogLevel::Trace>();
 
-    const std::string hostname = "co2measure.local";
-
     // Default values
+    std::string bindAddress    = "127.0.0.1";
     std::string sensorPath     = "/dev/ttyAMA0";
     int measuringInterval      = 10;
     unsigned short port        = 12345;
@@ -61,8 +62,11 @@ int main(int argc, char **argv)
 
     // Argument parsing using getopt
     int opt;
-    while ((opt = getopt(argc, argv, "s:i:k:l:")) != -1) {
+    while ((opt = getopt(argc, argv, "b:s:i:k:l:")) != -1) {
         switch (opt) {
+        case 'b':
+            bindAddress = optarg;
+            break;
         case 's':
             sensorPath = optarg;
             break;
@@ -86,23 +90,6 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
 
-    // ---Network Configuration Update---
-
-    // Sets a new hostname using hostnamectl for using mDNS
-    int status = std::system(("sudo hostnamectl set-hostname " + hostname).c_str());
-    if (status != 0) {
-        SPDLOG_ERROR("Error setting hostname. Status: {}, Error: {}", status, strerror(errno));
-        return EXIT_FAILURE;
-    }
-
-    // Restarts the avahi-daemon service to apply changes and update network information
-    status = std::system("sudo systemctl restart avahi-daemon");
-    if (status != 0) {
-        SPDLOG_ERROR("Error restarting avahi-daemon. Status: {}, Error: {}", status,
-                     strerror(errno));
-        return EXIT_FAILURE;
-    }
-
     // Read the OpenWeather API key
     std::string openWeatherApiKey{};
     try {
@@ -121,16 +108,17 @@ int main(int argc, char **argv)
         Application application(sensor, led, db, std::chrono::seconds(measuringInterval));
 
         io_context ioContext;
-        ip::tcp::endpoint endpoint(ip::tcp::v4(), port);
+        const auto address = ip::make_address(bindAddress);
+        ip::tcp::endpoint endpoint(address, port);
         Server server(ioContext, endpoint, openWeatherApiKey,
                       [&application](RequestData data, SendResponseCallback callback) {
                           SPDLOG_TRACE("DoTaskCallback");
                           application.doTask(data, callback);
                       });
 
-        application.setFetchOutdoorCO2Callback([&server](const std::string &location) {
-            SPDLOG_TRACE("FetchOutdoorCO2Callback");
-            return server.fetchOutdoorCO2Level(location);
+        application.setFetchOutdoorCOCallback([&server](const std::string &location) {
+            SPDLOG_TRACE("FetchOutdoorCOCallback");
+            return server.fetchOutdoorCOLevel(location);
         });
         application.startTasks();
 

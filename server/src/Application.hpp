@@ -5,6 +5,7 @@
 #include <chrono>
 #include <functional>
 #include <iomanip>
+#include <mutex>
 #include <sstream>
 #include <thread>
 #include <xgboost/c_api.h>
@@ -22,7 +23,7 @@ public:
     ~Application();
 
     void doTask(RequestData data, SendResponseCallback callback);
-    void setFetchOutdoorCO2Callback(FetchOutdoorCO2TaskCallback callback);
+    void setFetchOutdoorCOCallback(FetchOutdoorCOTaskCallback callback);
     void startTasks();
 
 private:
@@ -37,14 +38,14 @@ private:
     SQLiteDatabase &db_;
 
     BoosterHandle booster_;
-    DMatrixHandle h_input_;
+    std::mutex forecastMutex_;
 
     std::thread sensorThread_;
     std::thread outdoorThread_;
     std::atomic<bool> stopThreads_;
     std::chrono::seconds measuringInterval_;
 
-    FetchOutdoorCO2TaskCallback fetchOutdoorCO2Callback_;
+    FetchOutdoorCOTaskCallback fetchOutdoorCOCallback_;
 };
 
 #endif // APPLICATION_HPP

@@ -47,10 +47,10 @@ class SettingsFragment : Fragment() {
                 }
             }
 
-            override fun onStartTrackingTouch(circularSeekBar: CircularSeekBar?) {}
-            override fun onStopTrackingTouch(circularSeekBar: CircularSeekBar?) {
-                if (circularSeekBar != null) {
-                    onSeekBarChange(circularSeekBar.progress.toInt())
+            override fun onStartTrackingTouch(seekBar: CircularSeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: CircularSeekBar?) {
+                if (seekBar != null) {
+                    onSeekBarChange(seekBar.progress.toInt())
                 }
             }
         })
@@ -59,13 +59,9 @@ class SettingsFragment : Fragment() {
     }
 
     private fun onSeekBarChange(newValue: Int) {
-        dataRepository.sensorData.observe(viewLifecycleOwner, Observer { sensorData ->
-            var command = "warning_off"
-            if (sensorData.isNotEmpty() && sensorData.last().co2Level.toInt() >= newValue) {
-               command = "warning_on"
-            }
-            ApiClient.controlLed(command)
-        })
+        val level = dataRepository.sensorData.value?.lastOrNull()?.co2Level?.toIntOrNull()
+        val command = if (level != null && level >= newValue) "warning_on" else "warning_off"
+        ApiClient.controlLed(command)
     }
 
     companion object {

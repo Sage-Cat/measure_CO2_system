@@ -21,13 +21,11 @@ public:
 
 private:
     void doRead();
-    void doWrite(const std::string &response);
+    void doWrite(boost::beast::http::status status, const std::string &response);
     void doClose();
-    RequestData deserializeRequest(const std::string &requestBody);
-    std::string serializeResponse(const ResponseData &responseData);
 
 private:
-    boost::asio::ip::tcp::socket socket_;
+    boost::beast::tcp_stream socket_;
     boost::beast::flat_buffer buffer_;
     DoTaskCallback doTaskCallback_;
     unsigned int sessionId_;

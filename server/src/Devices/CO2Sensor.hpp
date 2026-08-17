@@ -18,6 +18,8 @@ public:
     // Reads CO2 concentration in PPM using UART interface.
     int readCO2();
 
+    static bool isValidReadResponse(const std::array<unsigned char, 9> &response);
+
     // Calibrates the zero point assuming the sensor is in a 400PPM CO2 environment.
     void calibrateZero();
 
@@ -32,7 +34,7 @@ public:
 
 private:
     void sendCommand();
-    char calculateChecksum() const;
+    unsigned char calculateChecksum() const;
     void configurePort();
 
 private:

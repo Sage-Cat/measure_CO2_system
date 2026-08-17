@@ -35,25 +35,18 @@ class MainFragment : Fragment() {
         return view
     }
 
-    override fun onResume() {
-        super.onResume()
-        val sharedPrefs = requireActivity().getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
-        val lastProgress = sharedPrefs.getFloat("LastProgress", 0f)
-
-        dataRepository.sensorData.observe(viewLifecycleOwner) { sensorData ->
-            if (sensorData.isNotEmpty()) {
-                val currentCO2Level = sensorData.last().co2Level.toInt()
-                val command = if (currentCO2Level >= lastProgress) "warning_on" else "warning_off"
-                ApiClient.controlLed(command)
-            }
-        }
-    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         dataRepository.sensorData.observe(viewLifecycleOwner, Observer { samples ->
             Log.d("MainFragment", "Received samples: ${samples.size}")
             adapter.updateSamples(samples)
+            val threshold = requireActivity()
+                .getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+                .getFloat("LastProgress", 0f)
+            samples.lastOrNull()?.co2Level?.toIntOrNull()?.let { level ->
+                ApiClient.controlLed(if (level >= threshold) "warning_on" else "warning_off")
+            }
         })
     }
 }

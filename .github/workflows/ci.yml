@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  server:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install server build dependencies
+        run: >-
+          sudo apt-get update && sudo apt-get install -y
+          libboost-system-dev libboost-filesystem-dev libsqlite3-dev
+          libspdlog-dev nlohmann-json3-dev libgpiod-dev libxgboost-dev libssl-dev pkg-config
+      - name: Configure and build server
+        run: cmake -S server -B server/build && cmake --build server/build --parallel 2
+      - name: Run offline server tests
+        run: ctest --test-dir server/build --output-on-failure
+
+  android:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: client
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Test and build Android client
+        env:
+          JAVA_HOME: ${{ env.JAVA_HOME_17_X64 }}
+        run: ./gradlew testDebugUnitTest assembleDebug --no-daemon

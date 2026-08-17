@@ -1,26 +1,25 @@
 @startuml
 
-package "Kotlin Client" {
-    [Ui] as Ui
-    [Client] as Client
+component "Android client" as Client
 
-    Client -[hidden]- Ui
+node "Raspberry Pi server" {
+    component "HTTP sessions" as Sessions
+    component Application
+    database SQLite
+    component "XGBoost model" as Model
+    component "MH-Z19B\nUART sensor" as Sensor
+    component "GPIO LED" as LED
 }
 
-package "RPI Server" {
-    [Server] as Server
-    [Session] as Session
-    [Application] as Application
-    [CO2Sensor] as CO2Sensor
-    [SQLiteDatabase] as SQLiteDatabase
+cloud "OpenWeather" as Weather
 
-    Server --> Session : creates sessions
-    Session -> Application : DoTaskCallback
-    Session <- Application : SendResponseCallback
-    Application ..> CO2Sensor : uses
-    Application ..> SQLiteDatabase : uses 
-}
-
-Client -> Server : http://localhost:8001
+Client -> Sessions : JSON/HTTP :12345\n(no TLS or authentication)
+Sessions -> Application : validated commands
+Application --> Sessions : JSON responses
+Application --> SQLite : indoor CO₂ ppm; outdoor CO µg/m³
+Application --> Sensor : 9-byte UART frames
+Application --> LED : on/off
+Application --> Model : 24-hour CO₂ forecast
+Application -> Weather : HTTPS (API key)
 
 @enduml
